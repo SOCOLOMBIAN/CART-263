@@ -103,23 +103,33 @@ document.querySelectorAll(".content-container")[1].style.background = "purple";
 /*************************************** */
 /* 3: Change the src element of the first image element on the page to be ...
 /***CODE */
-document.querySelectorAll("img")[0].setAttribute("src","task-1-images/seven.png")
+document.querySelectorAll("img")[0].setAttribute("src","task-1-images/seven.png");
 
 /*************************************** */
 /* 4: Select the third paragraph element on the page and 
 replace the content (within the paragraph) to be an h2 element which contains the text `TEST 123`
 /***CODE */
-console.log(document.getElementById(3).innerHTML = "<p> TEST 123 </p>");
+console.log(document.getElementById(3).innerHTML = "<h2> TEST 123 </h2>");
 /*************************************** */
 /* 5: Select the fourth paragraph element on the page and 
 add to the existing content an h2 element containing the text `TEST 123`
 /***CODE */
+let paraTh= document.createElement("h2");
+paraTh.innerHTML=" TEST 123";
+
+let parentElement = document.querySelectorAll("p")[3];
+parentElement.appendChild(paraTh)
 
 
 /*************************************** */
 /* 6: Select the fifth paragraph element on the page and add to the existing content 
 an img element that holds `one.png`, and add the class newStyle to said paragraph element.
 /***CODE */
+
+document.querySelectorAll("p")[4].innerHTML += "<img src= 'task-1-images/one.png'/>"
+
+let parentElement2 = document.querySelectorAll("p")[4];
+parentElement2.classList.add("newStyle");
 
 
 /*************************************** */
@@ -130,6 +140,13 @@ assign the element from innerContainers variable with the same index
 (i.e. colors[0] should be allocated to the first innerContainers element, colors[1] to the second, etc ...) 
 a background using that color.
 /***CODE */
+
+let colors =['red','blue','green','orange'];
+let innerContainer= document.querySelectorAll(".inner-container");
+
+for (let i=0; i<innerContainer.length; i++) {
+    innerContainer[i].style.background=colors[i];
+}
 
 /*************************************** */
 /*** END PART TWO MODIFY */ 
@@ -150,11 +167,31 @@ a background using that color.
 passing the current allPTagsThree element as the parent with each iteration.*/
 /***CODE */
 
+let allPtagsThree= document.querySelectorAll("p");
+
+function customCreateElement(parent){
+
+    let newParagraph= document.createElement("p");
+
+    newParagraph.textContent = "using create Element";
+
+    newParagraph.style.background= "green";
+
+    newParagraph.style.color= "white";
+
+    parent.appendChild(newParagraph);
+
+}
+
+for (let i=0; i< allPtagsThree.length; i++){
+    customCreateElement(allPtagsThree[i]);
+}
 
 /***EXPLANATION::
- * 
- * 
- */
+ * the creation of the variable allPtagsThree stores all the paragraph elements 
+ * the costum create element function will lead us acces to change the propieties 
+ * iteration with the foreachloop, this will get all the elements of the p and will change them
+ */ 
 
 /*************************************** */
 /* 2: GRID OF BOXES */
@@ -178,6 +215,13 @@ passing the current allPTagsThree element as the parent with each iteration.*/
 
 /***CODE */
 
+function customNewBoxCreate(parent){
+    let newDiv= document.createElement("div");
+    newDiv.classList.add("testDiv");
+    parentElement.appendChild(newDiv);
+    return newDiv;
+
+}
 
 /***EXPLANATION::
  * 
