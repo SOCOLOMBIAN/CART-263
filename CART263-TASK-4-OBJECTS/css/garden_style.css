@@ -39,3 +39,14 @@ body{
     position:absolute;
     border-style:solid;
 }
+
+.Flower_E .petal {
+
+    position: absolute;
+    border-style: solid;
+    border-radius: 50%;
+    transition: background-color 0.5s, border-color 0.5s;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+
+
+}

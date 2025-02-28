@@ -61,15 +61,22 @@ let garden = {
   
         // Create a new flower using the arguments
         let flower = new Flower(x, y, size, stemLength, petalColor);
+        let  f_e= new Flower_E(x +20, y+20, size, stemLength, petalColor);
         // Add the flower to the array of flowers
         garden.flowers.push(flower);
+        garden.flowers.push(f_e);
       }
 
       for (let i = 0; i < garden.numFlowers; i++) {
         // Add the flower to the array of flowers
-        garden.flowers[i].renderFlower();
+        if (garden.flowers[i] instanceof Flower) {
+          garden.flowers[i].renderFlower();
+        } else if (garden.flowers[i] instanceof Flower_E) {
+          garden.flowers[i].renderFlower_E(); // Render Flower_E
+        }
       }
-  }
+
+    }
   createAndRenderTheGarden();
   window.addEventListener("keydown", function handleKeyDown(event) {
   //call the handleKeyDown method of class
@@ -77,6 +84,9 @@ let garden = {
 });
 
 }
+
+
+
 
   
 
