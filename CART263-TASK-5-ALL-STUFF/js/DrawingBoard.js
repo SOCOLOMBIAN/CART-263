@@ -35,6 +35,9 @@ class DrawingBoard {
     }
     if(this.drawingBoardId ==="partD"){
       console.log("in D")
+      console.log(this.objectsOnCanvas)
+      this.objectsOnCanvas[0].updatePositionRect(this.mouseOffsetX ,this.mouseOffsetY)
+
    }
   }
 
@@ -58,6 +61,10 @@ class DrawingBoard {
     }
     if(this.drawingBoardId ==="partD"){
       console.log("in D")
+      console.log(this.objectsOnCanvas)
+      this.objectsOnCanvas[0]. changeColor(this.mouseOffsetX, this.mouseOffsetY)
+
+
       }
   }
   /* method to add obj to canvas */

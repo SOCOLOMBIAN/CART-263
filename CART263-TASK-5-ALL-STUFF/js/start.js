@@ -75,7 +75,7 @@ function animationLoop(){
 
 
 /** TASK 2:(Drawing Board B) - 
- *  1: Affect the rectangle by input from the microphone somehow, in real time...
+ *  1: Affect the rectangle by input from the microphone (any sorrt) somehow, in real time...
  *  at least two properties of the rectangle need to update and change...
  *  2: apply some arbitrary animation to the rectangle obj (change the properties in the update method provided)
  * -> the code for the microphone has NOT been added  - you need to implement it correctly...
@@ -90,7 +90,7 @@ function animationLoop(){
  *  
  */
 
-/** TASK 4:(Video - recorded - )
+/** TASK 4:(Video - recorded - ) // video
  * // add filters or manipulate the pixels... take user input from the boxes..
  *  1: using thr provided VideoObj class - > 
  * you will see all the code needed for activating  a blur filter on the video - activate it
