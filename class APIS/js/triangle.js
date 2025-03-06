@@ -40,4 +40,20 @@ class Triangle {
       context.stroke();
       context.closePath(); //end a path ..
     }
+    setPoints() {
+        //p1
+        this.x1 = this.xRef;
+        this.y1 = this.yRef;
+        //p2
+        this.x2 = this.x1 + this.lineLength;
+        this.y2 = this.y1;
+        //p3
+        this.x3 = this.x1 + this.lineLength / 2;
+        this.y3 = this.y1 - this.lineLength;
+     
+      }
+      update(){
+        this.xRef+=this.xSpeed;
+        this.yRef+=this.ySpeed;
+      }
   }
