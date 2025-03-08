@@ -62,9 +62,8 @@ class DrawingBoard {
     if(this.drawingBoardId ==="partD"){
       console.log("in D")
       console.log(this.objectsOnCanvas)
-      this.objectsOnCanvas[0]. changeColor(this.mouseOffsetX, this.mouseOffsetY)
-
-
+      this.objectsOnCanvas[0].changeColor(this.objectsOnCanvas[0].newCol)
+      
       }
   }
   /* method to add obj to canvas */
