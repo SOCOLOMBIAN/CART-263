@@ -11,34 +11,38 @@
 </head>
 <body>
 
+
+<!-- the inital page -->
 <div id="start-screen">
   <h1>Chromatic resonance</h1>
-  <button id="start-btn"> Start Game</button>
-  <button id="instructions-btn"> Instructions</button>
+  <p> Welcome to color ans sound game. you will need to click on the shapes in the order they ligth up to remember the sequences.</p>
+  <button id="start-btn">Begin Experience</button>
 </div>
 
-
-<div id="instructions-screen">
-    <h1>Instructions</h1>
-    <p>click on the shapes in the order they ligth up to remember the sequences.</p>
-    <button id="back-btn">Back</button>
-</div>
-
-<div id="game-screen">
- <canvas id="gameCanvas"></canvas>
- <div id="color-buttons">
+<!-- game page-->
+<div id="game-screen" class="hidden-screen">
     <button class="color-btn" data-color="purple"></button>
     <button class="color-btn" data-color="blue"></button>
     <button class="color-btn" data-color="green"></button>
     <button class="color-btn" data-color="yellow"></button>
-    </div>
-    <button id="reset-btn">Restart</button>
 </div>
 
-<audio id="ambient-sound" loop></audio>
+<div id="progress"></div>
 
+<!-- controls to the  user -->
+<div class="controls">
+    <button id="Go-btn">Go</button>
+    <button id="reset-btn">Restart</button>
 
+<!-- ccompletition screen -->  
+<div id="level-complete" class="hidden-screen">
+ <h2> sequence completed</h2>
+ <p> you've created a good resonance</p>
+</div>
 
-    
+<!-- possible background audio-->
+<audio id="ambient-sound" src="sounds/"loop></audio>
+
+   
 </body>
 </html>

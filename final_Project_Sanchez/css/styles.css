@@ -1,0 +1,53 @@
+body {
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    background-color: #080808;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    flex-direction: column;
+    transition: background-color 1s;
+
+}
+
+#start-screen, #game-screen, #level-complete{
+
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 600px;
+    padding:2opx;
+}
+
+.hidden-screen{
+    display:none;
+}
+
+button{
+
+    background:rgba(255, 255, 255, 0.1);
+}
+
+.color-btn {
+    width: 60px;
+    height: 80px;
+    border-radius: 50%;
+    margin:10px;
+    border-style:double;
+    border-color: gold;
+    transition: transform 0.7s, box-shadow 0.7s;
+    
+}
+
+.controls{
+    position: absolute;
+    bottom: 5vh;
+    display: flex;
+    gap: 20px;
+
+}
