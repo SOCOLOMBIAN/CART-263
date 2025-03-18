@@ -11,32 +11,34 @@
 </head>
 <body>
 
-
 <div id="start-screen">
   <h1>Chromatic resonance</h1>
   <button id="start-btn"> Start Game</button>
   <button id="instructions-btn"> Instructions</button>
 </div>
 
-<div id="instructions-screen" style="display:none;">
 
+<div id="instructions-screen">
+    <h1>Instructions</h1>
+    <p>click on the shapes in the order they ligth up to remember the sequences.</p>
+    <button id="back-btn">Back</button>
 </div>
 
+<div id="game-screen">
+ <canvas id="gameCanvas"></canvas>
+ <div id="color-buttons">
+    <button class="color-btn" data-color="purple"></button>
+    <button class="color-btn" data-color="blue"></button>
+    <button class="color-btn" data-color="green"></button>
+    <button class="color-btn" data-color="yellow"></button>
+    </div>
+    <button id="reset-btn">Restart</button>
+</div>
 
-<div class= "instructions-container">
- 
-    <h1> how to play</h1>
-    <p> Welcome to chromatic resonance! Here's how you play:</p>
-    <ul>
-    <li><strong> Click or Tap</strong> anywhere on the screen to change the colors and trigger corresponding sounds.</li>
+<audio id="ambient-sound" loop></audio>
+
+
+
     
-</ul>
-
-
-
-
-
-</div>
-     
 </body>
 </html>
