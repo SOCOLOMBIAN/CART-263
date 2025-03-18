@@ -31,23 +31,48 @@ body {
 button{
 
     background:rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor:pointer;
+    margin:10px;
+    border-radius:4px;
+    transition: all 0.3s;
+
 }
+
+button:hover{
+   background: rgba(255, 255, 255, 0.2);
+   transform:scale(1);
+}
+
 
 .color-btn {
     width: 60px;
     height: 80px;
     border-radius: 50%;
     margin:10px;
+    cursor:pointer;
     border-style:double;
     border-color: gold;
-    transition: transform 0.7s, box-shadow 0.7s;
+    transition: transform 0.7s, opacity 0.7s;
+    position:relative;
+    overflow:hidden;
     
 }
 
 .controls{
-    position: absolute;
-    bottom: 5vh;
-    display: flex;
-    gap: 20px;
+    margin-top:20px;
 
+    position: absolute;
+    display: flex;
+    justify-content: center;
+
+}
+
+.activated {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+    z-index: 10;
 }
