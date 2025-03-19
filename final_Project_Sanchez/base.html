@@ -19,20 +19,21 @@
   <button id="start-btn">Begin Experience</button>
 </div>
 
-<!-- game page-->
-<div id="game-screen" class="hidden-screen">
-    <button class="color-btn" data-color="purple"></button>
-    <button class="color-btn" data-color="blue"></button>
-    <button class="color-btn" data-color="green"></button>
-    <button class="color-btn" data-color="yellow"></button>
-</div>
+<div id="game-container" style="display:none"></div>
+  <div class="game-board" id="gameBoard"></div>
 
-<div id="progress"></div>
-
-<!-- controls to the  user -->
+<!-- controls for the  user -->
 <div class="controls">
     <button id="Go-btn">Go</button>
     <button id="reset-btn">Restart</button>
+</div>
+
+<!-- status of the game -->
+<div class="status" id="statusText"></div>
+<div class="score" id="scoreText"> score:0</div>
+<div class="level-indicator" id="levelText">Level:1</div>
+
+<canvas id="art-canvas" class="art-canvas" width="300" height="200"></canvas>
 
 <!-- ccompletition screen -->  
 <div id="level-complete" class="hidden-screen">
