@@ -1,78 +1,72 @@
 body {
-    margin: 0;
-    padding: 0;
-    align-items: center;
-    text-align: center;
-    overflow: hidden;
-    background-color: #080808;
-    font-family: "Helvetica Neue", Arial, sans-serif;
-    color: rgba(255, 255, 255, 0.8);
+    font-family: 'Arial', sans-serif;
     display: flex;
-    flex-direction: column;
-    transition: background-color 1s;
-
-}
-
-#start-screen, #game-screen, #level-complete{
-
-    display:flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    max-width: 600px;
-    padding:2opx;
+    min-height: 100vh;
+    margin: 0;
+    background-color: black;
+    transition: background-color 0.5s;
+    padding: 20px;
 }
 
-.hidden-screen{
-    display:none;
+h1 {
+  
+    margin-bottom: 10px;
+    color:#f0f0f0;
+    font-size: 3rem;
+}
+
+h2{
+    color:white;
+    margin-bottom:15px;
+}
+
+p{
+    color: white;
+    text-align:center;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+
+#start-screen{
+
+    display:flex;
+    flex-direction:column;
+    align-items: center;
+    justify-content:center;
+    text-align:center;
+    margin-bottom: 30px;
+    padding:20px;
+    border-radius: 10px;
+    box-shadow:7px 9px 2px 1px rgba(211, 211, 218, 0.2);
+}
+
+.game-board{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+    width: 100%;
+}
+
+
+.controls{
+    display: flex;
+    gap:15px;
+    margin: 15px 0;
 }
 
 button{
-
-    background:rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px;
-    padding: 10px 20px;
-    font-size: 1rem;
+  
+    padding:10px 20px;
+    font-size: 12px;
+    border:none;
+    border-radius: 20px;
+    background-color:antiquewhite;
     cursor:pointer;
-    margin:10px;
-    border-radius:4px;
     transition: all 0.3s;
-
 }
 
-button:hover{
-   background: rgba(255, 255, 255, 0.2);
-   transform:scale(1);
-}
-
-
-.color-btn {
-    width: 60px;
-    height: 80px;
-    border-radius: 50%;
-    margin:10px;
-    cursor:pointer;
-    border-style:double;
-    border-color: gold;
-    transition: transform 0.7s, opacity 0.7s;
-    position:relative;
-    overflow:hidden;
-    
-}
-
-.controls{
-    margin-top:20px;
-
-    position: absolute;
-    display: flex;
-    justify-content: center;
-
-}
-
-.activated {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
-    z-index: 10;
-}

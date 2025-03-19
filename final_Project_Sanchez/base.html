@@ -19,7 +19,7 @@
   <button id="start-btn">Begin Experience</button>
 </div>
 
-<div id="game-container" style="display:none"></div>
+<div id="game-container" style="display: none; width: 100%; align-items: center; display: flex; flex-direction: column;">
   <div class="game-board" id="gameBoard"></div>
 
 <!-- controls for the  user -->
@@ -34,11 +34,13 @@
 <div class="level-indicator" id="levelText">Level:1</div>
 
 <canvas id="art-canvas" class="art-canvas" width="300" height="200"></canvas>
+</div>
 
 <!-- ccompletition screen -->  
 <div id="level-complete" class="hidden-screen">
  <h2> sequence completed</h2>
  <p> you've created a good resonance</p>
+ <button id="continue-btn">Continue</button>
 </div>
 
 <!-- possible background audio-->
