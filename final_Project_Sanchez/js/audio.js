@@ -1,30 +1,39 @@
-// Audio Context for sound generation
-let audioContext;
+// Audio controller
+class AudioController {
+    constructor() {
+        this.audioContext = null;
+        this.ambientSound = document.getElementById('ambient-sound');
+        this.initAudioContext();
+    }
 
-// Initialize audio context
-function initAudio() {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-}
+    // Initialize audio context
+    initAudioContext() {
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.error('Web Audio API is not supported in this browser');
+        }
+    }
 
-// Play a tone with color relationship
-function playTone(frequency, duration, color) {
-    if (!audioContext) initAudio();
-    
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.type = 'sine';
-    oscillator.frequency.value = frequency;
-    
-    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + duration);
-    
-    // Visual feedback on canvas
-    drawVisualEffect(color);
+    // Play a tone with the given frequency
+    playTone(frequency) {
+        if (!this.audioContext) return;
+        
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.value = frequency;
+        
+        gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.5, this.audioContext.currentTime + 0.05);
+        gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.5);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        oscillator.start();
+        oscillator.stop(this.audioContext.currentTime + 0.5);
+    }
+
 }

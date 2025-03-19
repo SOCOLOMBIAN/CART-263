@@ -1,159 +1,159 @@
-// Game variables
-let sequence = [];
-let playerSequence = [];
-let level = 1;
-let score = 0;
-let isPlaying = false;
-let canPlayerInput = false;
-let shapes = [];
-
-// Initialize game when DOM is fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Setup event listeners
-    document.getElementById('start-btn').addEventListener('click', startGame);
-    document.getElementById('Go-btn').addEventListener('click', startSequence);
-    document.getElementById('reset-btn').addEventListener('click', resetGame);
-    document.getElementById('continue-btn').addEventListener('click', nextLevel);
-    
-    // Initialize canvas
-    initCanvas();
-});
-
-// Start the game
-function startGame() {
-    document.getElementById('start-screen').style.display = 'none';
-    document.getElementById('game-container').style.display = 'flex';
-    initializeGame();
-    initAudio();
-}
-
-// Initialize game board
-function initializeGame() {
-    const gameBoard = document.getElementById('gameBoard');
-    gameBoard.innerHTML = '';
-    shapes = [];
-    
-    colors.forEach((color, index) => {
-        const shape = document.createElement('div');
-        shape.className = 'shape';
-        shape.dataset.color = color;
-        shape.style.backgroundColor = color;
+// Game controller
+class GameController {
+    constructor(audioController, canvasController, uiController) {
+        this.audio = audioController;
+        this.canvas = canvasController;
+        this.ui = uiController;
         
-        shape.addEventListener('click', () => {
-            if (!canPlayerInput) return;
-            
-            const frequency = colorToFrequency[color];
-            playTone(frequency, 0.3, color);
-            flashShape(shape);
-            
-            checkPlayerInput(index);
-        });
+        this.gameSequence = [];
+        this.playerSequence = [];
+        this.level = 1;
+        this.score = 0;
+        this.gameActive = false;
+        this.playingSequence = false;
+    }
+
+    // Start a new game
+    startGame() {
+        this.gameActive = true;
+        this.gameSequence = [];
+        this.playerSequence = [];
+        this.level = 1;
+        this.score = 0;
         
-        gameBoard.appendChild(shape);
-        shapes.push(shape);
-    });
-    
-    updateStatus('Press Go to start!');
-}
-
-// Start the sequence demonstration
-function startSequence() {
-    if (!isPlaying) {
-        startLevel();
+        this.ui.updateScore(this.score);
+        this.ui.updateLevel(this.level);
+        this.ui.setStatusText('Watch the sequence...');
+        this.canvas.show();
+        this.canvas.clearCanvas();
+        
+        setTimeout(() => this.nextRound(), config.nextRoundDelay);
     }
-}
 
-// Generate and show the sequence
-function startLevel() {
-    playerSequence = [];
-    generateSequence();
-    showSequence();
-    isPlaying = true;
-}
-
-// Generate a random sequence based on current level
-function generateSequence() {
-    sequence = [];
-    for (let i = 0; i < level; i++) {
-        sequence.push(Math.floor(Math.random() * 4));
+    // Reset the game
+    resetGame() {
+        this.gameActive = false;
+        this.gameSequence = [];
+        this.playerSequence = [];
+        this.level = 1;
+        this.score = 0;
+        
+        this.ui.updateScore(this.score);
+        this.ui.updateLevel(this.level);
+        this.ui.setStatusText('');
+        this.canvas.clearCanvas();
     }
-}
 
-// Show the sequence to the player
-async function showSequence() {
-    canPlayerInput = false;
-    updateStatus('Watch the sequence...');
-    
-    for (let i = 0; i < sequence.length; i++) {
-        await new Promise(resolve => {
-            setTimeout(() => {
-                const index = sequence[i];
-                const shape = shapes[index];
-                const color = shape.dataset.color;
-                flashShape(shape);
-                playTone(colorToFrequency[color], 0.3, color);
-                resolve();
-            }, 600);
-        });
+    // Start the next round
+    nextRound() {
+        if (!this.gameActive) return;
+        
+        this.playerSequence = [];
+        this.addToSequence();
+        this.playSequence();
     }
-    
-    canPlayerInput = true;
-    updateStatus('Your turn! Repeat the sequence.');
-}
 
-// Check player's input against the sequence
-function checkPlayerInput(colorIndex) {
-    playerSequence.push(colorIndex);
-    
-    const currentIndex = playerSequence.length - 1;
-    
-    if (playerSequence[currentIndex] !== sequence[currentIndex]) {
-        // Wrong input
-        updateStatus('Wrong sequence! Try again.');
-        playTone(100, 0.5, 'rgba(255, 0, 0, 0.5)');
-        resetGame();
-        return;
+    // Add a new random color to the sequence
+    addToSequence() {
+        const randomIndex = Math.floor(Math.random() * colors.length);
+        this.gameSequence.push(randomIndex);
     }
-    
-    if (playerSequence.length === sequence.length) {
-        // Completed the sequence
-        score += level * 10;
-        updateScore();
+
+    // Play the current sequence
+    playSequence() {
+        this.playingSequence = true;
+        this.ui.disableButtons(true);
+        this.ui.setStatusText('Watch the sequence...');
+        
+        let i = 0;
+        const interval = setInterval(() => {
+            if (i >= this.gameSequence.length) {
+                clearInterval(interval);
+                this.playingSequence = false;
+                this.ui.disableButtons(false);
+                this.ui.setStatusText('Your turn!');
+                return;
+            }
+            
+            const index = this.gameSequence[i];
+            this.highlightButton(index);
+            i++;
+        }, config.sequenceInterval);
+    }
+
+    // Highlight a button and play its sound
+    highlightButton(index) {
+        const color = colors[index];
+        
+        this.ui.highlightButtonByIndex(index);
+        this.audio.playTone(color.frequency);
+        this.ui.setBackgroundColor(color.code + '20'); // Light version of the color
         
         setTimeout(() => {
-            document.getElementById('level-complete').classList.remove('hidden-screen');
-        }, 500);
+            this.ui.unhighlightButtonByIndex(index);
+            this.ui.resetBackgroundColor();
+        }, config.highlightDuration);
     }
-}
 
-// Move to the next level
-function nextLevel() {
-    document.getElementById('level-complete').classList.add('hidden-screen');
-    level++;
-    updateScore();
-    startLevel();
-}
+    // Handle player button click
+    handleButtonClick(index) {
+        if (!this.gameActive || this.playingSequence) return;
+        
+        this.playerSequence.push(index);
+        this.highlightButton(index);
+        this.checkSequence();
+    }
 
-// Update status text
-function updateStatus(text) {
-    document.getElementById('statusText').textContent = text;
-}
+    // Check if player's sequence matches the game sequence
+    checkSequence() {
+        const currentIndex = this.playerSequence.length - 1;
+        
+        if (this.playerSequence[currentIndex] !== this.gameSequence[currentIndex]) {
+            // Wrong sequence
+            this.gameOver();
+            return;
+        }
+        
+        if (this.playerSequence.length === this.gameSequence.length) {
+            // Correct sequence
+            this.score += this.level * config.baseScore;
+            this.ui.updateScore(this.score);
+            
+            // Add art element using the last color in the sequence
+            const lastColorIndex = this.gameSequence[this.gameSequence.length - 1];
+            this.canvas.addElement(colors[lastColorIndex].code, this.level);
+            
+            // Check if level up
+            if (this.gameSequence.length % 3 === 0 && this.level < config.maxLevel) {
+                this.levelUp();
+            } else {
+                setTimeout(() => {
+                    this.ui.setStatusText('Correct! Next round...');
+                    setTimeout(() => this.nextRound(), config.nextRoundDelay);
+                }, 500);
+            }
+        }
+    }
 
-// Update score display
-function updateScore() {
-    document.getElementById('scoreText').textContent = `Score: ${score}`;
-    document.getElementById('levelText').textContent = `Level: ${level}`;
-}
+    // Level up
+    levelUp() {
+        this.level++;
+        this.ui.updateLevel(this.level);
+        this.ui.showLevelComplete();
+    }
 
-// Reset the game
-function resetGame() {
-    sequence = [];
-    playerSequence = [];
-    level = 1;
-    score = 0;
-    isPlaying = false;
-    canPlayerInput = false;
-    
-    updateScore();
-    updateStatus('Press Go to start!');
+    // Continue after level completion
+    continueGame() {
+        this.ui.hideLevelComplete();
+        this.ui.setStatusText('Next level starting...');
+        setTimeout(() => this.nextRound(), config.nextRoundDelay);
+    }
+
+    // Game over
+    gameOver() {
+        this.gameActive = false;
+        this.ui.setStatusText('Game Over! Your artwork is complete.');
+        this.canvas.finalizeArtwork(this.score);
+        this.ui.enableGameControls();
+    }
 }
