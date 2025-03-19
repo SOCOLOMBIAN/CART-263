@@ -4,14 +4,17 @@ class UIController {
         this.startScreen = document.getElementById('start-screen');
         this.gameContainer = document.getElementById('game-container');
         this.gameBoard = document.getElementById('gameBoard');
-        this.goButton = document.getElementById('Go-btn');
+        this.goButton = document.getElementById('go-btn');
         this.resetButton = document.getElementById('reset-btn');
         this.statusText = document.getElementById('statusText');
         this.scoreText = document.getElementById('scoreText');
         this.levelText = document.getElementById('levelText');
         this.levelComplete = document.getElementById('level-complete');
+        this.gameOver = document.getElementById('game-over');
+        this.finalScore = document.getElementById('final-score');
         this.startButton = document.getElementById('start-btn');
         this.continueButton = document.getElementById('continue-btn');
+        this.playAgainButton = document.getElementById('play-again-btn');
         
         this.buttonElements = [];
     }
@@ -32,13 +35,11 @@ class UIController {
     }
 
     // Highlight a button by index
-    highlightButtonByIndex(index) {
+    highlightButton(index) {
         this.buttonElements[index].classList.add('active');
-    }
-
-    // Unhighlight a button by index
-    unhighlightButtonByIndex(index) {
-        this.buttonElements[index].classList.remove('active');
+        setTimeout(() => {
+            this.buttonElements[index].classList.remove('active');
+        }, 500);
     }
 
     // Set the background color
@@ -48,7 +49,7 @@ class UIController {
 
     // Reset the background color
     resetBackgroundColor() {
-        document.body.style.backgroundColor = '#f0f0f0';
+        document.body.style.backgroundColor = 'black';
     }
 
     // Show the game screen, hide start screen
@@ -67,6 +68,17 @@ class UIController {
         this.levelComplete.classList.remove('active');
     }
 
+    // Show game over screen
+    showGameOver(score) {
+        this.finalScore.textContent = `Your score: ${score}`;
+        this.gameOver.classList.add('active');
+    }
+
+    // Hide game over screen
+    hideGameOver() {
+        this.gameOver.classList.remove('active');
+    }
+
     // Update the score display
     updateScore(score) {
         this.scoreText.textContent = `Score: ${score}`;
@@ -83,15 +95,15 @@ class UIController {
     }
 
     // Enable or disable all game buttons
-    disableButtons(disabled) {
+    toggleButtons(enabled) {
         this.buttonElements.forEach(button => {
-            button.disabled = disabled;
-            button.style.cursor = disabled ? 'not-allowed' : 'pointer';
-            button.style.opacity = disabled ? '0.7' : '1';
+            button.disabled = !enabled;
+            button.style.cursor = enabled ? 'pointer' : 'not-allowed';
+            button.style.opacity = enabled ? '1' : '0.7';
         });
     }
 
-    // Disable game controls at start
+    // Disable game controls
     disableGameControls() {
         this.goButton.disabled = true;
         this.resetButton.disabled = false;
@@ -103,7 +115,7 @@ class UIController {
         this.resetButton.disabled = false;
     }
 
-    // Add event listeners for a button
+    // Add event listeners for buttons
     addButtonListener(buttonIndex, callback) {
         this.buttonElements[buttonIndex].addEventListener('click', () => callback(buttonIndex));
     }
@@ -126,5 +138,10 @@ class UIController {
     // Add event listener for continue button
     addContinueButtonListener(callback) {
         this.continueButton.addEventListener('click', callback);
+    }
+
+    // Add event listener for play again button
+    addPlayAgainButtonListener(callback) {
+        this.playAgainButton.addEventListener('click', callback);
     }
 }

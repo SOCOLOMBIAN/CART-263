@@ -34,5 +34,4 @@ class AudioController {
         oscillator.start();
         oscillator.stop(this.audioContext.currentTime + 0.5);
     }
-
 }

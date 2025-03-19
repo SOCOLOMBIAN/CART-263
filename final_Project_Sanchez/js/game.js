@@ -1,8 +1,16 @@
+// Game configuration
+const config = {
+    sequenceInterval: 1000,      // Time between sequence elements (ms)
+    highlightDuration: 500,      // How long each button stays highlighted (ms)
+    nextRoundDelay: 1500,        // Delay before starting next round (ms)
+    baseScore: 10,               // Base score per correct sequence
+    maxLevel: 10                 // Maximum game level
+};
+
 // Game controller
 class GameController {
-    constructor(audioController, canvasController, uiController) {
+    constructor(audioController, uiController) {
         this.audio = audioController;
-        this.canvas = canvasController;
         this.ui = uiController;
         
         this.gameSequence = [];
@@ -24,7 +32,6 @@ class GameController {
         this.ui.updateScore(this.score);
         this.ui.updateLevel(this.level);
         this.ui.setStatusText('Watch the sequence...');
-    
         
         setTimeout(() => this.nextRound(), config.nextRoundDelay);
     }
@@ -39,7 +46,8 @@ class GameController {
         
         this.ui.updateScore(this.score);
         this.ui.updateLevel(this.level);
-      
+        this.ui.setStatusText('');
+        this.ui.hideGameOver();
     }
 
     // Start the next round
@@ -60,7 +68,7 @@ class GameController {
     // Play the current sequence
     playSequence() {
         this.playingSequence = true;
-        this.ui.disableButtons(true);
+        this.ui.toggleButtons(false);
         this.ui.setStatusText('Watch the sequence...');
         
         let i = 0;
@@ -68,7 +76,7 @@ class GameController {
             if (i >= this.gameSequence.length) {
                 clearInterval(interval);
                 this.playingSequence = false;
-                this.ui.disableButtons(false);
+                this.ui.toggleButtons(true);
                 this.ui.setStatusText('Your turn!');
                 return;
             }
@@ -83,12 +91,11 @@ class GameController {
     highlightButton(index) {
         const color = colors[index];
         
-        this.ui.highlightButtonByIndex(index);
+        this.ui.highlightButton(index);
         this.audio.playTone(color.frequency);
         this.ui.setBackgroundColor(color.code + '20'); // Light version of the color
         
         setTimeout(() => {
-            this.ui.unhighlightButtonByIndex(index);
             this.ui.resetBackgroundColor();
         }, config.highlightDuration);
     }
@@ -117,12 +124,8 @@ class GameController {
             this.score += this.level * config.baseScore;
             this.ui.updateScore(this.score);
             
-            // Add art element using the last color in the sequence
-            const lastColorIndex = this.gameSequence[this.gameSequence.length - 1];
-            this.canvas.addElement(colors[lastColorIndex].code, this.level);
-            
             // Check if level up
-            if (this.gameSequence.length % 3 === 0 && this.level < config.maxLevel) {
+            if (this.gameSequence.length % 3 === 0) {
                 this.levelUp();
             } else {
                 setTimeout(() => {
@@ -150,8 +153,8 @@ class GameController {
     // Game over
     gameOver() {
         this.gameActive = false;
-        this.ui.setStatusText('Game Over! Your artwork is complete.');
-        this.canvas.finalizeArtwork(this.score);
+        this.ui.setStatusText('Game Over!');
+        this.ui.showGameOver(this.score);
         this.ui.enableGameControls();
     }
 }

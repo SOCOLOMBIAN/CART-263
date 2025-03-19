@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize controllers
     const audioController = new AudioController();
     const uiController = new UIController();
-    const gameController = new GameController(audioController, canvasController, uiController);
+    const gameController = new GameController(audioController, uiController);
     
     // Initialize UI
     uiController.init();
@@ -31,5 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     uiController.addContinueButtonListener(() => {
         gameController.continueGame();
+    });
+    
+    uiController.addPlayAgainButtonListener(() => {
+        uiController.hideGameOver();
+        gameController.startGame();
     });
 });
