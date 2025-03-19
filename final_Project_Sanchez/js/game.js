@@ -24,8 +24,7 @@ class GameController {
         this.ui.updateScore(this.score);
         this.ui.updateLevel(this.level);
         this.ui.setStatusText('Watch the sequence...');
-        this.canvas.show();
-        this.canvas.clearCanvas();
+    
         
         setTimeout(() => this.nextRound(), config.nextRoundDelay);
     }
@@ -40,8 +39,7 @@ class GameController {
         
         this.ui.updateScore(this.score);
         this.ui.updateLevel(this.level);
-        this.ui.setStatusText('');
-        this.canvas.clearCanvas();
+      
     }
 
     // Start the next round

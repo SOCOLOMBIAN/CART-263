@@ -8,7 +8,6 @@
     <link rel= "stylesheet" href="css/styles.css">
     <script src="js/colors.js"></script>
     <script src="js/audio.js"></script>
-    <script src="js/canvas.js"></script>
     <script src="js/game.js"></script>
     <script src="js/index.js"></script>
     <script src="js/control.js"></script>
@@ -38,15 +37,19 @@
 <div class="score" id="scoreText"> score:0</div>
 <div class="level-indicator" id="levelText">Level:1</div>
 
-<canvas id="art-canvas" class="art-canvas" width="300" height="200"></canvas>
-</div>
 
-<!-- ccompletition screen -->  
+<!-- completition screen -->  
 <div id="level-complete" class="hidden-screen">
  <h2> sequence completed</h2>
  <p> you've created a good resonance</p>
  <button id="continue-btn">Continue</button>
 </div>
+
+<!-- game over screen -->  
+<div id="game-over" class="hidden-screen">
+  <h2>Game Over!</h2>
+  <p id="final-score">Your score: 0</p>
+  <button id="play-again-btn">Play Again</button>
 
 <!-- possible background audio-->
 <audio id="ambient-sound" src="sounds/"loop></audio>

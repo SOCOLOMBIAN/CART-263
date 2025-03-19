@@ -2,7 +2,6 @@
 class AudioController {
     constructor() {
         this.audioContext = null;
-        this.ambientSound = document.getElementById('ambient-sound');
         this.initAudioContext();
     }
 

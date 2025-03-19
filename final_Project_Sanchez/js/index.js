@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize controllers
     const audioController = new AudioController();
-    const canvasController = new CanvasController();
     const uiController = new UIController();
     const gameController = new GameController(audioController, canvasController, uiController);
     
