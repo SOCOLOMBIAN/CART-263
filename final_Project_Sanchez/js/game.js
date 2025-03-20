@@ -1,10 +1,10 @@
 // Game configuration
 const config = {
-    sequenceInterval: 1000,      // Time between sequence elements (ms)
-    highlightDuration: 500,      // How long each button stays highlighted (ms)
-    nextRoundDelay: 1500,        // Delay before starting next round (ms)
-    baseScore: 10,               // Base score per correct sequence
-    maxLevel: 10                 // Maximum game level
+    sequenceInterval: 1000,// Time between sequence elements (ms)
+    highlightDuration: 500,// How long each button stays highlighted (ms)
+    nextRoundDelay: 1500, // Delay before starting next round (ms)
+    baseScore: 10, // Base score per correct sequence
+    maxLevel: 8, // Maximum game level
 };
 
 // Game controller
@@ -91,18 +91,14 @@ class GameController {
         setTimeout(playNext, 500);
     }
 
-    // Highlight a button and play its sound with improved visibility
+    // Highlight a button 
     highlightButton(index) {
         const color = colors[index];
         
         // Make background flash with the button color
-        this.ui.setBackgroundColor(color.code + '30'); // More visible background change
-        
-        // Add active class for visual effect
-        this.ui.highlightButton(index);
-        
-        // Play the sound
-        this.audio.playTone(color.frequency);
+        this.ui.setBackgroundColor(color.code + '30'); // visible background 
+        this.ui.highlightButton(index); // Add active class for visual effect
+        this.audio.playTone(color.frequency);// Play the sound
         
         // Reset background after highlight duration
         setTimeout(() => {
@@ -110,7 +106,7 @@ class GameController {
         }, config.highlightDuration);
     }
 
-    // Handle player button click
+    // player button click
     handleButtonClick(index) {
         if (!this.gameActive || this.playingSequence) return;
         

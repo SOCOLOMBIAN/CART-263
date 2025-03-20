@@ -31,7 +31,7 @@ class UiController {
             button.className = 'color-button';
             button.style.backgroundColor = colors[i].code;
             
-            // Add a label for debugging (can be removed later)
+        //     // Add a label for debugging (can be removed later)
             const label = document.createElement('span');
             label.style.position = 'absolute';
             label.style.top = '50%';
@@ -47,19 +47,16 @@ class UiController {
             this.gameBoard.appendChild(button);
             this.buttonElements.push(button);
         }
-        
         console.log("Created buttons:", this.buttonElements.length);
-    }
-
-    // Highlight a button by index with more obvious visual feedback
+      }
+    
+    // Highlight a button by index with visual feedback
     highlightButton(index) {
         if (index < 0 || index >= this.buttonElements.length) {
             console.error("Invalid button index:", index);
             return;
         }
-        
         console.log("Highlighting button:", index);
-        
         const button = this.buttonElements[index];
         
         // Add a flash effect
@@ -75,7 +72,7 @@ class UiController {
         }, 500);
     }
 
-    // Set the background color
+    // // Set the background color
     setBackgroundColor(color) {
         document.body.style.backgroundColor = color;
     }
@@ -83,8 +80,8 @@ class UiController {
     // Reset the background color
     resetBackgroundColor() {
         document.body.style.backgroundColor = 'black';
+    
     }
-
     // Show the game screen, hide start screen
     showGame() {
         this.startScreen.style.display = 'none';
@@ -187,7 +184,7 @@ function getContrastColor(hexColor) {
         hexColor = hexColor.substring(1);
     }
     
-    // Standard color names
+    // color names
     const colorMap = {
         'red': '#FF0000',
         'green': '#00FF00',
@@ -216,3 +213,4 @@ function getContrastColor(hexColor) {
     // Return white for dark colors, black for light colors
     return luminance > 0.5 ? 'black' : 'white';
 }
+

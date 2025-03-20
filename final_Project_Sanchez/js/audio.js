@@ -8,9 +8,9 @@ class AudioController {
     // Initialize audio context
     initAudioContext() {
         try {
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.audioContext = new (window.AudioContext)();
         } catch (e) {
-            console.error('Web Audio API is not supported in this browser');
+            console.error('Web Audio API');
         }
     }
 
@@ -25,13 +25,13 @@ class AudioController {
         oscillator.frequency.value = frequency;
         
         gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.5, this.audioContext.currentTime + 0.05);
+        gainNode.gain.linearRampToValueAtTime(0.5, this.audioContext.currentTime + 0.05); //audio gaing
         gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.5);
         
         oscillator.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
         
         oscillator.start();
-        oscillator.stop(this.audioContext.currentTime + 0.5);
+        oscillator.stop(this.audioContext.currentTime + 0.5); //time to stop the oscillator
     }
 }
