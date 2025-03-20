@@ -72,9 +72,8 @@ class GameController {
         this.ui.setStatusText('Watch the sequence...');
         
         let i = 0;
-        const interval = setInterval(() => {
+        const playNext = () => {
             if (i >= this.gameSequence.length) {
-                clearInterval(interval);
                 this.playingSequence = false;
                 this.ui.toggleButtons(true);
                 this.ui.setStatusText('Your turn!');
@@ -83,18 +82,29 @@ class GameController {
             
             const index = this.gameSequence[i];
             this.highlightButton(index);
+            
             i++;
-        }, config.sequenceInterval);
+            setTimeout(playNext, config.sequenceInterval);
+        };
+        
+        // Start the sequence after a short delay
+        setTimeout(playNext, 500);
     }
 
-    // Highlight a button and play its sound
+    // Highlight a button and play its sound with improved visibility
     highlightButton(index) {
         const color = colors[index];
         
-        this.ui.highlightButton(index);
-        this.audio.playTone(color.frequency);
-        this.ui.setBackgroundColor(color.code + '20'); // Light version of the color
+        // Make background flash with the button color
+        this.ui.setBackgroundColor(color.code + '30'); // More visible background change
         
+        // Add active class for visual effect
+        this.ui.highlightButton(index);
+        
+        // Play the sound
+        this.audio.playTone(color.frequency);
+        
+        // Reset background after highlight duration
         setTimeout(() => {
             this.ui.resetBackgroundColor();
         }, config.highlightDuration);

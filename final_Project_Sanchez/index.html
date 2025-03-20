@@ -9,39 +9,37 @@
     <script src="js/colors.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/game.js"></script>
-    <script src="js/index.js"></script>
     <script src="js/control.js"></script>
-
+    <script src="js/index.js"></script>
 </head>
 <body>
 
-
-<!-- the inital page -->
+<!-- the initial page -->
 <div id="start-screen">
   <h1>Chromatic resonance</h1>
-  <p> Welcome to color ans sound game. you will need to click on the shapes in the order they ligth up to remember the sequences.</p>
+  <p> Welcome to color and sound game. You will need to click on the shapes in the order they light up to remember the sequences.</p>
   <button id="start-btn">Begin Experience</button>
 </div>
 
-<div id="game-container" style="display: none; width: 100%; align-items: center; display: flex; flex-direction: column;">
+<!-- space for the game when begin -->
+<div id="game-container" style="display: none; width: 100%; align-items: center; flex-direction: column;">
   <div class="game-board" id="gameBoard"></div>
 
-<!-- controls for the  user -->
-<div class="controls">
-    <button id="Go-btn">Go</button>
-    <button id="reset-btn">Restart</button>
+  <!-- controls for the user -->
+  <div class="controls">
+      <button id="go-btn">Go</button>
+      <button id="reset-btn">Restart</button>
+  </div>
+
+  <!-- status of the game -->
+  <div class="status" id="statusText"></div>
+  <div class="score" id="scoreText">Score: 0</div>
+  <div class="level-indicator" id="levelText">Level: 1</div>
 </div>
 
-<!-- status of the game -->
-<div class="status" id="statusText"></div>
-<div class="score" id="scoreText"> score:0</div>
-<div class="level-indicator" id="levelText">Level:1</div>
-
-
-<!-- completition screen -->  
+<!-- completion screen -->  
 <div id="level-complete" class="hidden-screen">
- <h2> sequence completed</h2>
- <p> you've created a good resonance</p>
+ <h2>Sequence completed</h2>
  <button id="continue-btn">Continue</button>
 </div>
 
@@ -50,10 +48,10 @@
   <h2>Game Over!</h2>
   <p id="final-score">Your score: 0</p>
   <button id="play-again-btn">Play Again</button>
+</div>
 
 <!-- possible background audio-->
-<audio id="ambient-sound" src="sounds/"loop></audio>
-
+<audio id="ambient-sound" loop></audio>
    
 </body>
 </html>

@@ -19,26 +19,59 @@ class UIController {
         this.buttonElements = [];
     }
 
-    // Initialize the UI
+    // Initialize the UI with improved button creation
     init() {
-        // Create color buttons
+        // Clear existing buttons
         this.gameBoard.innerHTML = '';
+        this.buttonElements = [];
         
+        // Create color buttons with better styling
         for (let i = 0; i < colors.length; i++) {
             const button = document.createElement('button');
             button.className = 'color-button';
             button.style.backgroundColor = colors[i].code;
+            
+            // Add a label for debugging (can be removed later)
+            const label = document.createElement('span');
+            label.style.position = 'absolute';
+            label.style.top = '50%';
+            label.style.left = '50%';
+            label.style.transform = 'translate(-50%, -50%)';
+            label.style.color = getContrastColor(colors[i].code);
+            label.style.fontSize = '12px';
+            label.style.fontWeight = 'bold';
+            label.textContent = i + 1;
+            
+            button.appendChild(label);
             button.dataset.index = i;
             this.gameBoard.appendChild(button);
             this.buttonElements.push(button);
         }
+        
+        console.log("Created buttons:", this.buttonElements.length);
     }
 
-    // Highlight a button by index
+    // Highlight a button by index with more obvious visual feedback
     highlightButton(index) {
-        this.buttonElements[index].classList.add('active');
+        if (index < 0 || index >= this.buttonElements.length) {
+            console.error("Invalid button index:", index);
+            return;
+        }
+        
+        console.log("Highlighting button:", index);
+        
+        const button = this.buttonElements[index];
+        
+        // Add a flash effect
+        button.style.boxShadow = "0 0 30px white";
+        button.style.transform = "scale(1.1)";
+        button.classList.add('active');
+        
+        // Reset after highlight duration
         setTimeout(() => {
-            this.buttonElements[index].classList.remove('active');
+            button.style.boxShadow = "";
+            button.style.transform = "";
+            button.classList.remove('active');
         }, 500);
     }
 
@@ -144,4 +177,42 @@ class UIController {
     addPlayAgainButtonListener(callback) {
         this.playAgainButton.addEventListener('click', callback);
     }
+}
+
+// Helper function to determine contrasting text color
+function getContrastColor(hexColor) {
+    // Convert hex to RGB
+    let r, g, b;
+    if (hexColor.startsWith('#')) {
+        hexColor = hexColor.substring(1);
+    }
+    
+    // Standard color names
+    const colorMap = {
+        'red': '#FF0000',
+        'green': '#00FF00',
+        'blue': '#0000FF',
+        'yellow': '#FFFF00'
+    };
+    
+    if (colorMap[hexColor]) {
+        hexColor = colorMap[hexColor].substring(1);
+    }
+    
+    // Parse RGB
+    if (hexColor.length === 3) {
+        r = parseInt(hexColor.charAt(0) + hexColor.charAt(0), 16);
+        g = parseInt(hexColor.charAt(1) + hexColor.charAt(1), 16);
+        b = parseInt(hexColor.charAt(2) + hexColor.charAt(2), 16);
+    } else {
+        r = parseInt(hexColor.substring(0, 2), 16);
+        g = parseInt(hexColor.substring(2, 4), 16);
+        b = parseInt(hexColor.substring(4, 6), 16);
+    }
+    
+    // Calculate luminance
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    
+    // Return white for dark colors, black for light colors
+    return luminance > 0.5 ? 'black' : 'white';
 }
