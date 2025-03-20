@@ -1,5 +1,5 @@
 // UI controller
-class UIController {
+class UiController {
     constructor() {
         this.startScreen = document.getElementById('start-screen');
         this.gameContainer = document.getElementById('game-container');
@@ -19,7 +19,7 @@ class UIController {
         this.buttonElements = [];
     }
 
-    // Initialize the UI with improved button creation
+    // Initialize the UI with the button creation
     init() {
         // Clear existing buttons
         this.gameBoard.innerHTML = '';

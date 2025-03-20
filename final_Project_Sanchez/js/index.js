@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize controllers
+    // controllers
     const audioController = new AudioController();
-    const uiController = new UIController();
+    const uiController = new UiController();
     const gameController = new GameController(audioController, uiController);
     
     // Initialize UI
@@ -19,11 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
         uiController.showGame();
     });
     
+    // click,start game, disable 
     uiController.addGoButtonListener(() => {
         gameController.startGame();
         uiController.disableGameControls();
     });
     
+    //reset button, reset game, enable 
     uiController.addResetButtonListener(() => {
         gameController.resetGame();
         uiController.enableGameControls();
@@ -31,10 +33,5 @@ document.addEventListener('DOMContentLoaded', () => {
     
     uiController.addContinueButtonListener(() => {
         gameController.continueGame();
-    });
-    
-    uiController.addPlayAgainButtonListener(() => {
-        uiController.hideGameOver();
-        gameController.startGame();
     });
 });
