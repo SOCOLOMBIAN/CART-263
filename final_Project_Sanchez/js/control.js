@@ -19,7 +19,7 @@ class UiController {
         this.buttonElements = [];
     }
 
-    // Initialize the UI with the button creation
+    // Initialize the UI with improved button creation
     init() {
         // Clear existing buttons
         this.gameBoard.innerHTML = '';
