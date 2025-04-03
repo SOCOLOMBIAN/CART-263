@@ -33,11 +33,11 @@ async function fetchText() {
       console.log(phrase_as_array);
       
       // split for the array 1
-      let phrase_as_array= imputUser.split(/["".?!\n|]/);
+      let phrase_as_array= value.split(/["".?!\n|]/);
 
       //slip for the text
 
-      let rainbow_tokens= originalRainBowText.slipt(/["".?!\n|]/);
+      let rainbow_tokens= originalRainBowText.split(/["".?!\n|]/);
 
       //SR
       runPartC(rainbow_tokens, phrase_as_array);
@@ -61,30 +61,36 @@ async function fetchText() {
     for (let j= 0; j < currentWord.length; j++ ){
        const nextChar= currentWord[j];
 
-    for (let k= 0; k < rainbow_words.lenght; k++){
+    for (let k= 0; k < rainbow_words.length; k++){
         const rainbow= rainbow_words[k];
     
-        if (rainbow.lenght > j && rainbow[j] === nextChar )
-        {
+        if (rainbow.lenght > j && rainbow[j] === nextChar ) {
           if (poem_sentence.length >0){
             poem_sentence += "";
           }
           poem_sentence += rainbow;
           break
 
-        }
       }
+    }
   }
 }
-    
+console.log(poem_sentence);    
     //to next stage
     runPartD(poem_sentence);
-
+  }
   
    /****** PART D:: VISUALIZE  */
   function runPartD(new_sentence){
 
   }
+
+
+
+
+
+
+
 
   /****** PART E:: RESET  */
   function resetPoem() {
@@ -92,5 +98,4 @@ async function fetchText() {
   
   }
  //window onload
-}
 }
