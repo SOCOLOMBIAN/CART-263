@@ -20,7 +20,7 @@ async function fetchText() {
  //(B(iii)) -->> PUT TEXT
  document.querySelector("#rainbow_text").textContent = raw_rainbow_text;
 
-    //document.querySelector("#resetButton").addEventListener("click", resetPoem);
+    document.querySelector("#resetButton").addEventListener("click", resetPoem);
     runPartB(raw_rainbow_text);
   } catch (e) {}
 }
@@ -119,12 +119,12 @@ console.log(poem_sentence);
       const randomColor= colors[getRandom(0, colors.length -1)];
       letterSpan.style.color= randomColor;
 
-      const fontSize= fonts[getRandom(0,fonts.length -1)];
-      letterSpan.style.fontSize= fontSize;
+      const randomFont= fonts[getRandom(0,fonts.length -1)];
+      letterSpan.style.fontFamily= randomFont;
 
       letterSpan.addEventListener("click", function() {
       // make it bigger 
-      this.style.transform="scale(1.5)";
+      this.style.transform="scale(1.58)";
 
       setTimeout(() => {
         this.style.transform= "scale(1)";
@@ -139,6 +139,20 @@ console.log(poem_sentence);
   /****** PART E:: RESET  */
   function resetPoem() {
   /*** TO FILL IN */
-  
+
+  // clear the html output 
+  document.getElementById("output").innerHTML="";
+ 
+  // hide the element of the output 
+  document.getElementById("output").style.display= "none";
+
+  // clear the value of phrase
+  document.getElementById("phrase").value= "";
+
+  //clear values on my vizualisation 
+  const letterSpans= document.querySelectorAll("#output span");
+  letterSpans.forEach(span => {
+    span.style.transform= "scale(1)";
+  }); 
   }
  //window onload
