@@ -7,15 +7,23 @@ function run() {
 /****** PART A:: FETCH */  
 async function fetchText() {
   console.log("in fetch");
-  let raw_rainbow_text = "";
+  //let raw_rainbow_text = "";
   try {
-   
     let response= await fetch("files/rainbow.txt")
     let raw_rainbow_text= await response.text();
-    console.log(rainbowText);
+    console.log(raw_rainbow_text);
+ //(B(i))
+
+ document.querySelector("#stepOneButton").remove();
+ //(B(ii)) --> SR SHOW 
+ document.querySelector("#inputDiv").style.display = "block";
+ //(B(iii)) -->> PUT TEXT
+ document.querySelector("#rainbow_text").textContent = raw_rainbow_text;
+
     //document.querySelector("#resetButton").addEventListener("click", resetPoem);
     runPartB(raw_rainbow_text);
   } catch (e) {}
+}
 }
   
   /****** PART B:: TEXT PROCESSING  */
@@ -26,18 +34,19 @@ async function fetchText() {
 
    /* FILL IN HERE */
     function producePoem() {
-      //console.log(originalRainBowText)
+      console.log(originalRainBowText)
 
       //getting the user input 
       const value = document.getElementById("phrase").value;
-      console.log(phrase_as_array);
+      console.log(value);
       
       // split for the array 1
-      let phrase_as_array= value.split(/["".?!\n|]/);
+      let phrase_as_array= value.split(/[" ".?!\n|]/);
+      console.log(phrase_as_array)
 
-      //slip for the text
-
-      let rainbow_tokens= originalRainBowText.split(/["".?!\n|]/);
+      //slipt for the text
+      let rainbow_tokens= originalRainBowText.split(/[" ".?!\n|]/);
+      console.log(rainbow_tokens)
 
       //SR
       runPartC(rainbow_tokens, phrase_as_array);
@@ -63,13 +72,12 @@ async function fetchText() {
 
     for (let k= 0; k < rainbow_words.length; k++){
         const rainbow= rainbow_words[k];
-    
-        if (rainbow.lenght > j && rainbow[j] === nextChar ) {
+        if (rainbow.length > j && rainbow[j] === nextChar ) {
           if (poem_sentence.length >0){
-            poem_sentence += "";
+            poem_sentence += " ";
           }
           poem_sentence += rainbow;
-          break
+          break;
 
       }
     }
@@ -77,20 +85,56 @@ async function fetchText() {
 }
 console.log(poem_sentence);    
     //to next stage
-    runPartD(poem_sentence);
+    runPartD(poem_sentence);  
   }
   
    /****** PART D:: VISUALIZE  */
   function runPartD(new_sentence){
 
+    console.log(new_sentence)
+
+    const outputDiv= document.getElementById("output");
+
+    outputDiv.style.display ="block"
+
+    outputDiv.innerHTML="";
+
+    const fonts= [
+      "'Comic Sans MS'", "'Impact'", "'verdana'", "'Palantino'"
+    ];
+
+    const colors=[
+    "#FF5733", "#33FF57", "#3357FF", "#F333FF", "#FF3333", 
+    "#33FFF3", "#FFF333", "#8C33FF", "#FF8C33", "#33FF8C"
+    ];
+
+    const getRandom= (min,max) => {
+      return Math.floor(Math.random() * (max - min +1)) +min;
+    };
+    
+    [...new_sentence].forEach(char => {
+      const letterSpan= document.createElement("span");
+      letterSpan.textContent= char;
+       
+      const randomColor= colors[getRandom(0, colors.length -1)];
+      letterSpan.style.color= randomColor;
+
+      const fontSize= fonts[getRandom(0,fonts.length -1)];
+      letterSpan.style.fontSize= fontSize;
+
+      letterSpan.addEventListener("click", function() {
+      // make it bigger 
+      this.style.transform="scale(1.5)";
+
+      setTimeout(() => {
+        this.style.transform= "scale(1)";
+      }, 300);
+      });
+
+      outputDiv.appendChild(letterSpan);
+    });
   }
-
-
-
-
-
-
-
+  
 
   /****** PART E:: RESET  */
   function resetPoem() {
@@ -98,4 +142,3 @@ console.log(poem_sentence);
   
   }
  //window onload
-}
