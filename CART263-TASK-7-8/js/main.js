@@ -38,7 +38,7 @@ const filteredIrises = irisesWithColors.filter(
 );
 console.log("irises:",filteredIrises);
 
-
+// sum and average of the petal length
 const sum =irisesWithColors.reduce(
     function(accum,iris)
     {
@@ -46,12 +46,13 @@ const sum =irisesWithColors.reduce(
     },0
 );
 
+// average of the petal length
 const averagePetalLength= sum / irisesWithColors.length;
 
     console.log(sum);
     console.log(averagePetalLength);
 
-
+//  find the petalWidth on the irises
 const petal= irisesWithColors.find(
     function(iris) {
     return( iris.petalWidth > 1.0)
@@ -59,15 +60,38 @@ const petal= irisesWithColors.find(
 );
 console.log(petal);
 
-// some(): Use some() on irisesWithColors
-//  to find out if there is an object that has a petalLength >10
-
+// find object in the irises with >10
 const theSome = irisesWithColors.some(
     function (iris){
         return( iris.petalLength > 10 );
     }
 );
 console.log(theSome);
+
+// find object in the irises with == 4.2
+const theSome2 = irisesWithColors.some(
+    function (iris){
+        return( iris.petalLength == 4.2 );
+    }
+);
+console.log(theSome2);
+
+
+// find the every object <3 
+const theEvery = irisesWithColors.every(
+    function (iris){
+        return(iris.petalWidth < 3);
+    });
+console.log(theEvery); 
+
+// find the object on the irises >1.2
+const theEvery2 = irisesWithColors.every(
+    function (iris){
+        return(iris.sepalWidth > 1.2);
+    });
+console.log(theEvery2); 
+
+
 
 
 } catch (error){
