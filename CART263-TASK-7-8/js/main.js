@@ -51,14 +51,19 @@ const averagePetalLength= sum / irisesWithColors.length;
     console.log(averagePetalLength);
 
 
+const petal= irisesWithColors.find(
+    function(iris) {
+    return( iris.petalWidth > 1.0)
+}
+);
+console.log(petal);
+
+// some(): Use some() on irisesWithColors
+//  to find out if there is an object that has a petalLength >10
 
 
 
 
-
-
-
-    
 
 } catch (error){
     console.error(error.message);
