@@ -18,6 +18,7 @@ try{
 // possible colors 
 let possibleColor= ["#5d3fd3","#a73fd3","#d33fb5","#d35d3f","#d3a73f"];
 
+// map the possible colors
  const irisesWithColors= json.map(item => {
     const addRandomColor= possibleColor[Math.floor(Math.random()* possibleColor.length)];
     return{
@@ -61,8 +62,12 @@ console.log(petal);
 // some(): Use some() on irisesWithColors
 //  to find out if there is an object that has a petalLength >10
 
-
-
+const theSome = irisesWithColors.some(
+    function (iris){
+        return( iris.petalLength > 10 );
+    }
+);
+console.log(theSome);
 
 
 } catch (error){
