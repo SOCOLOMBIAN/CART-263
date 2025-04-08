@@ -28,26 +28,18 @@ let possibleColor= ["#5d3fd3","#a73fd3","#d33fb5","#d35d3f","#d3a73f"];
  
  console.log(" colors",irisesWithColors);
 
+
+// new array and filtered irises 
+const filteredIrises = irisesWithColors.filter(
+    function (iris) {
+        return(iris.sepalWidth >=4);
+    }
+);
+console.log("irises:",filteredIrises);
+
+
 } catch (error){
     console.error(error.message)
-}
-
-// filter(): Use the filter() on irisesWithColors to output a new array called 
-// filteredIrises. The task is to: 
-// filter out all objects whose `sepalWidth` >=4
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ }
 
 }
