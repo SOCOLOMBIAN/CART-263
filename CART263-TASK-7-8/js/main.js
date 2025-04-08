@@ -92,7 +92,10 @@ const theEvery2 = irisesWithColors.every(
 console.log(theEvery2); 
 
 
+// toSorted irisesWithColors on petal width smalles to largest 
+const irisesWithColorsSorted = irisesWithColors.toSorted((a, b) => a.petalWidth - b.petalWidth);
 
+console.log (irisesWithColorsSorted);
 
 } catch (error){
     console.error(error.message);
