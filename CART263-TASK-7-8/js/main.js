@@ -38,8 +38,30 @@ const filteredIrises = irisesWithColors.filter(
 console.log("irises:",filteredIrises);
 
 
+const sum =irisesWithColors.reduce(
+    function(accum,iris)
+    {
+       return(accum + iris.petalLength)
+    },0
+);
+
+const averagePetalLength= sum / irisesWithColors.length;
+
+    console.log(sum);
+    console.log(averagePetalLength);
+
+
+
+
+
+
+
+
+
+    
+
 } catch (error){
-    console.error(error.message)
+    console.error(error.message);
  }
 
 }
