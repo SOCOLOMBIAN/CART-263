@@ -1,6 +1,6 @@
 class SoundObject{
 
-    constructor(audioCtx , frequency,type,duration){
+    constructor(audioCtx ,frequency,type,duration){
          // create Oscillator node
     this.oscillator = audioCtx.createOscillator(); // input sound wave
     this.gainNode = audioCtx.createGain(); // volume module
