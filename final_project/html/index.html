@@ -6,7 +6,6 @@
     <title> Chromatic sounds </title>
     <link rel="stylesheet" href="css/main.css">
 
-
 </head>
 <body>
 
@@ -14,30 +13,33 @@
 
 <div class=" intro-screen" id="screen">
 <h2> Shape & Sound Memory</h2>
-<p> Welcome to the watch and lisen to the sequence of shapes,then repeat it correctly to score points! Each correct sequence will create an unique Generative Art</p>
+<p> Welcome to the watch and listen to the sequence of shapes,then repeat it correctly to score points! Each correct sequence will create an unique Generative Art</p>
 <button class="start-btn" id="start-btn"> Start Game</button>
 </div>
 
-<!-- game over screen-->
- <div class="game Over" id="game-over">
- <h2> Game Over!</h2>
- <p> your final Score:<span id="final-score">0</span></p>
- <button class="btn" id="restart-btn"> Play again</button>
-
- <!-- got the correct sequence-->
- <div class="message" id="message"> Perfect! </div>
- <!-- got the wrong sequence-->
- <div class="message" id="message"> upss! </div>
-
-  <!-- Game screen, is playing-->
+<!-- Game screen, is playing-->
 <div class="game-container"> 
 <h1> follow the sequence!</h1>
 <div class= "score-display"> score:<span id="score">0</span></div>
 
-<div class="controls">
 
-    <button class="btn" id="play-btn"> Play </button>
+ <!-- feedback messages-->
+ <div class="message" id="message"> Perfect! </div>
+ <div class="message-wrong" id="messageWrong"> opss! </div>
+
+<div class="controls">
+    <button class="playSequenceBtn" id="play-btn"> Play sequence </button>
     <button class="save-btn" id="save-btn" disabled> save ArtWork </button>
+    </div>
+</div>
+
+
+<!-- game over screen-->
+<div class="game-over" id="game-over">
+    <h2> Game Over!</h2>
+    <p> your final Score:<span id="final-score">0</span></p>
+<div class="gallery" id="gallery"> </div>
+<button class="btn" id="restart-btn"> Play again</button>
 </div>
 
  <!-- run the scripts-->
@@ -48,6 +50,5 @@
 <script src="js/prisma.js"></script>
 <script src="js/raro.js"></script>
 
-       </div>
    </body>
 </html>
