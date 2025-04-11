@@ -2,8 +2,6 @@
 let audioCtx;
 document.addEventListener('DOMContentLoaded', () => { 
     audioCtx= new AudioContext();
-});
-
 
 //svg elements 
 document.getElementById('shape-0').innerHTML=raro;
@@ -28,34 +26,30 @@ playBtn.addEventListener('click', playSequence);
             playShape(index);
             const result= gameState.addPlayerMove(index);
 
-            if (!result.corret) {
+            if (!result.correct) {
                 showMessage(errorMessage);
                 setTimeout(endGame,1000);
                 return;
             }
                //correct sequence
-            if (result.correct) {
             updateDisplay(result.score, result.level);
             showMessage(successMessage);
             
             // Generate art based on sequence
            //generateArt(result.sequence, result.level, artDisplay);
-        
-           //saveBtn.disabled = false;
+          //saveBtn.disabled = false;
 
            setTimeout(() => {
-            const newSate= gameState.levelup();
-            updateDisplay(newSate.score, newSate.level);
+            const newState= gameState.levelUp();
+            updateDisplay(newState.score, newState.level);
             gameState.generateNextSequence();
             playBtn.disabled=false;
            }, 1500);
         }
-     }
    });
 });
 
 function startGame(){
-
     introScreen.classList.remove('active');
     gameScreen.classList.add('active')
     const state= gameState.resetGame();
@@ -63,7 +57,7 @@ function startGame(){
     gameState.generateNextSequence();
     playBtn.disabled=false;
     //artDisplay.style.display='none';
-    //svaeBtn.disable=true;
+    //saveBtn.disabled =true;
 }
 
 function restartGame() {
@@ -74,7 +68,7 @@ function restartGame() {
     gameState.generateNextSequence();
     playBtn.disabled=false;
     //artDisplay.style.display='none';
-    //svaeBtn.disable=true;
+    //saveBtn.disable=true;
 
 }
 
@@ -91,18 +85,18 @@ function playSequence(){
   playBtn.disabled= true;
   //savebtn.disabled=true;
 
-// conditions to play the game
-let i=0;
-const interval= setInterval => {
-    playSphape(sequence[i]);
+// play the sequence
+let i = 0;
+const interval = setInterval(() => {
+    playShape(sequence[i]);
     i++;
-if (i >= sequence.length) {
-clearInterval(interval);
-setTimeout(() => {
-    gameState.finishPlayingSequence();
-    }, 500);
-   }
-  }, 1000);
+    if (i >= sequence.length) {
+        clearInterval(interval);
+        setTimeout(() => {
+            gameState.finishPlayingSequence();
+        }, 500);
+    }
+}, 1000);
 }
 
 function playSphape(index) {
@@ -122,10 +116,10 @@ function endGame(){
 window.addEventListener('click',() => {
     if (audioCtx.state=== 'suspended') {
         audioCtx.resume();
-    }
- }, {once: true});
-
+     }
+  }, {once: true});
 });
+
 
 
 
