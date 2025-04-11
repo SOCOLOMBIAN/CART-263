@@ -1,19 +1,21 @@
 
+import GameState from 'js/state.js';
 let audioCtx;
 document.addEventListener('DOMContentLoaded', () => { 
     audioCtx= new AudioContext();
 
 //svg elements 
-document.getElementById('shape-0').innerHTML=raro;
-document.getElementById('shape-1').innerHTML=prisma;
-document.getElementById('shape-2').innerHTML=estrella;
-document.getElementById('shape-3').innerHTML=circle;
+// document.getElementById('shape-0').innerHTML=raro;
+// document.getElementById('shape-1').innerHTML=prisma;
+// document.getElementById('shape-2').innerHTML=estrella;
+// document.getElementById('shape-3').innerHTML=circle;
 
 const gameState = new GameState();
 
 // get the DOM elements 
 const introScreen = document.getElementById('intro-screen');
 const gameScreen = document.getElementById('game-screen');
+const startBtn = document.getElementById('start-btn');
 
 //Event listeners
 startBtn.addEventListener('click',startGame);
@@ -99,7 +101,7 @@ const interval = setInterval(() => {
 }, 1000);
 }
 
-function playSphape(index) {
+function playShape(index) {
 }
 
 function showMessage(element){
