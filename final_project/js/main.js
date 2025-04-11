@@ -1,5 +1,6 @@
 
-document,addEventListener('DOMContentLoaded', () => { 
+let audioCtx;
+document.addEventListener('DOMContentLoaded', () => { 
     audioCtx= new AudioContext();
 });
 
@@ -18,13 +19,13 @@ const gameScreen = document.getElementById('game-screen');
 
 //Event listeners
 startBtn.addEventListener('click',startGame);
-restartBtn.addEventListener('click',restartBtn);
+restartBtn.addEventListener('click',restartGame);
 playBtn.addEventListener('click', playSequence);
 
     shapes.forEach((shape, index) => {
          shape.addEventListener('click', () => {
             if (gameState.canPlayerInteract){
-            playSphape(index);
+            playShape(index);
             const result= gameState.addPlayerMove(index);
 
             if (!result.corret) {
@@ -99,17 +100,36 @@ if (i >= sequence.length) {
 clearInterval(interval);
 setTimeout(() => {
     gameState.finishPlayingSequence();
-},500);
-
-
-
+    }, 500);
+   }
+  }, 1000);
 }
 
-
-
+function playSphape(index) {
 }
 
+function showMessage(element){
 }
+
+function endGame(){
+    gameScreen.classList.remove('active');
+    gameOverScreen.classList.add('active');
+
+     // Display saved artworks in the gallery
+     //displayGallery(gallery, gameState.savedArtworks);
+}
+
+window.addEventListener('click',() => {
+    if (audioCtx.state=== 'suspended') {
+        audioCtx.resume();
+    }
+ }, {once: true});
+
+});
+
+
+
+
 
 
 
