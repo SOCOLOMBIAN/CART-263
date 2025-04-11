@@ -1,122 +1,115 @@
-window.onload = go;
 
-let audioCtx;
-let shapes= [];
-let sequenceManager;
-
-function go() {
-     audioCtx= new AudioContext();
-     initializeShapes();
-
-sequenceManager= new sequenceManager(audioCtx,shapes);
-
- // event listeners
-document.getElementById('playSequenceBtn').addEventListener('click',() => {
-    playerSequence = [];
-
-    disableGameButtons();
-
-// audio working 
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-
-//play sequence and enable buttons
-    sequenceManager.playSequence(() => {
-        enableGameButtons();
-    });
+document,addEventListener('DOMContentLoaded', () => { 
+    audioCtx= new AudioContext();
 });
 
-   document.getElementById('generateSequenceBtn').addEventListener('click', () => {
-    // Reset player sequence
-    playerSequence = [];
 
-    sequenceManager.generateSequence();
+//svg elements 
+document.getElementById('shape-0').innerHTML=raro;
+document.getElementById('shape-1').innerHTML=prisma;
+document.getElementById('shape-2').innerHTML=estrella;
+document.getElementById('shape-3').innerHTML=circle;
 
-   document.getElementById('soundInfo').innerHTML=
-   "New sequence generated!"
+const gameState = new GameState();
 
-  });
-}
+// get the DOM elements 
+const introScreen = document.getElementById('intro-screen');
+const gameScreen = document.getElementById('game-screen');
 
-// track player sequence 
-let playerSequence= [];
+//Event listeners
+startBtn.addEventListener('click',startGame);
+restartBtn.addEventListener('click',restartBtn);
+playBtn.addEventListener('click', playSequence);
 
-****function initializeShapes() {
+    shapes.forEach((shape, index) => {
+         shape.addEventListener('click', () => {
+            if (gameState.canPlayerInteract){
+            playSphape(index);
+            const result= gameState.addPlayerMove(index);
 
-    //shapes with SVGS
+            if (!result.corret) {
+                showMessage(errorMessage);
+                setTimeout(endGame,1000);
+                return;
+            }
+               //correct sequence
+            if (result.correct) {
+            updateDisplay(result.score, result.level);
+            showMessage(successMessage);
+            
+            // Generate art based on sequence
+           //generateArt(result.sequence, result.level, artDisplay);
+        
+           //saveBtn.disabled = false;
 
-    svgData.forEach((data, index) => {
-        const shape= new Shape(
-            audioCtx,
-            200 + (index * 100), //different base for each shape
-            [ 'sine', 'sine', 'triangle'] [index % 3],
-            0.8, // duration
-            data.svg,
-            data.background,
-            index
-        );
-
-        shape.setClickCallback((shapeIndex) => {
-
-        if ( !sequenceManager.isPlaying) {
-            playerSequence.push(shapeIndex);
-
-            document.getElementById('soundInfo').innerHTML=
-            `You clicked shape ${shapeIndex + 1}. Sequence so far: ${playerSequence.length} / ${sequenceManager.sequence.length}`;
-
-        // check the player completition
-        if (playerSequence.length === sequenceManager.sequence.length){
-           checkPlayerSequence();
-
+           setTimeout(() => {
+            const newSate= gameState.levelup();
+            updateDisplay(newSate.score, newSate.level);
+            gameState.generateNextSequence();
+            playBtn.disabled=false;
+           }, 1500);
         }
-      }
-    });
-    shapes.push(shape);
-  });
+     }
+   });
+});
+
+function startGame(){
+
+    introScreen.classList.remove('active');
+    gameScreen.classList.add('active')
+    const state= gameState.resetGame();
+    updateDisplay(state.score,state.level);
+    gameState.generateNextSequence();
+    playBtn.disabled=false;
+    //artDisplay.style.display='none';
+    //svaeBtn.disable=true;
+}
+
+function restartGame() {
+    gameOverScreen.classList.remove('active');
+    gameScreen.classList.add('active');
+    const state= gameState.resetGame();
+    updateDisplay(state.score,state.level);
+    gameState.generateNextSequence();
+    playBtn.disabled=false;
+    //artDisplay.style.display='none';
+    //svaeBtn.disable=true;
+
+}
+
+function updateDisplay(score,level) {
+    scoreDisplay.textContent= score;
+    levelDisplay.textContent= level;
+    finalScoreDisplay.textContent= score;
+}
+
+function playSequence(){
+  if (gameState.isPlaying) return;
+
+  const sequence= gameState.startPlayingSequence();
+  playBtn.disabled= true;
+  //savebtn.disabled=true;
+
+// conditions to play the game
+let i=0;
+const interval= setInterval => {
+    playSphape(sequence[i]);
+    i++;
+if (i >= sequence.length) {
+clearInterval(interval);
+setTimeout(() => {
+    gameState.finishPlayingSequence();
+},500);
+
+
+
 }
 
 
-// reset the player sequence 
-function resetPlayerSequence(){
-playerSequence= [];
 
 }
-// disable buttons
-function disableGameButtons(){
-document.getElementById('playSequenceBtn').disabled = true;
-document.getElementById('generateSequenceBtn').disabled = true;
+
 }
-
-//enable buttons
-function enableGameButtons(){
-document.getElementById('playSequenceBtn').disabled = false;
-document.getElementById('generateSequenceBtn').disabled = false;
-}
-
- //check if the player matches the sequence 
- function checkPlayerSequence() {
-    const sequenceCorrect= sequenceManager.checkSequence(playerSequence);
-
-    if (sequenceCorrect){
-        document.getElementById('soundInfo').innerHTML =
-        "Correct!";
-    } else{
-        document.getElementById('soundInfo').innerHTML=
-        "incorrect!";
-    
-    resetPlayerSequence ();
-    disableGameButtons();
-
-    setTimeout(() => {
-        enableGameButtons();
-    }, 1500);
- }
-}
-
-
-
-
 
 
 
