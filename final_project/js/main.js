@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // get the DOM elements 
 const screens={
-    intro: document.getElementById('intro-screen'),
+    intro: document.getElementById('screen'),
     game: document.getElementById('game-screen'),
     gameOver: document.getElementById('game-over')
   };
@@ -57,8 +57,8 @@ buttons.play.addEventListener('click', playSequence);
                 return;
             }
              //correct sequence
-            updateDisplay(result.score, result.level);
-            showMessage(successMessage);
+            displays.messageWrong(result.score, result.level);
+            displays.message(successMessage);
             
             // Generate art based on sequence
            //generateArt(result.sequence, result.level, artDisplay);
@@ -140,6 +140,7 @@ function playShape(index) {
         soundInfo.type,
         soundInfo.duration
     );
+
 }
 
 function showMessage(element) {

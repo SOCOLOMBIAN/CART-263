@@ -26,7 +26,7 @@ return{
     level:this.level };
 }
 
-generateRandomSoundMap (audioCtx) {
+generateRandomSoundMap() {
     this.soundMap= Array.from({ length: 4}, () => ({
         frequency: 200 + Math.random()* 800,
         type:['sine','square','triangle','sawtooth'][Math.floor(Math.random()*4)],
