@@ -26,6 +26,9 @@ let possibleColor= ["#5d3fd3","#a73fd3","#d33fb5","#d35d3f","#d3a73f"];
         color: addRandomColor
     };
   });
+
+  const visualization= new irisVisualization(irisesWithColorsSorted);
+  visualization.init();
  
  console.log(" colors",irisesWithColors);
 
