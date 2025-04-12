@@ -16,6 +16,9 @@ class SoundObject{
     this.oscillator.start();
     this.gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
     this.gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-    }
 
+    setTimeout(() => {
+        this.oscillator.stop();
+      }, duration * 1000);
+    }
 }

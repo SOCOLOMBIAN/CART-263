@@ -8,7 +8,7 @@ this.score= 0;
 this.level= 1;
 this.isPlaying= false;
 this.canPlayerInteract=false;
-this.soundMap= this.generateSoundMap();
+this.soundMap= this.generateRandomSoundMap();
 //this.savedArtworks=[];
 }
 
@@ -18,27 +18,30 @@ this.playerSequence=[];
 this.score= 0;
 this.level= 1;
 this.isPlaying= false;
-this.soundMap= this.generateSoundMap();
 this.canPlayerInteract=false;
+this.soundMap= this.generateRandomSoundMap();
 
 return{
     score:this.score,
     level:this.level };
 }
 
-generateNextSequence(){
-    const nextShape= Math.floor(Math.random()*4);
-    this.gameSequence.push(nextShape);
-    return this.sequence
-}
-
-generateSoundMap (audioCtx) {
+generateRandomSoundMap (audioCtx) {
     this.soundMap= Array.from({ length: 4}, () => ({
         frequency: 200 + Math.random()* 800,
-        type:['sine','square','triangle','sawtooth'][Math.floor(Math.random()*4)]
+        type:['sine','square','triangle','sawtooth'][Math.floor(Math.random()*4)],
+        duration: 0.3 + Math.random() *0.4 
     }));
 }
 
+// players get the answer, it generates next sequence
+generateNextSequence(){
+  const nextShape= Math.floor(Math.random()*4);
+  this.gameSequence.push(nextShape);
+  return this.gameSequence
+}
+
+// playing the sequence 
 startPlayingSequence(){
     this.isPlaying=true;
     this.canPlayerInteract=false;
@@ -79,6 +82,7 @@ addPlayerMove(shapeIndex) {
   
   levelUp(){
     this.level++;
+    this.soundMap = this.generateRandomSoundMap();
     return { score: this.score, level: this.level};
   }
 }  

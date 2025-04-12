@@ -1,39 +1,62 @@
 
-import GameState from 'js/state.js';
-let audioCtx;
+
 document.addEventListener('DOMContentLoaded', () => { 
-    audioCtx= new AudioContext();
+ const audioCtx= new AudioContext();
 
-//svg elements 
-// document.getElementById('shape-0').innerHTML=raro;
-// document.getElementById('shape-1').innerHTML=prisma;
-// document.getElementById('shape-2').innerHTML=estrella;
-// document.getElementById('shape-3').innerHTML=circle;
+ const gameState = new GameState();
 
-const gameState = new GameState();
 
 // get the DOM elements 
-const introScreen = document.getElementById('intro-screen');
-const gameScreen = document.getElementById('game-screen');
-const startBtn = document.getElementById('start-btn');
+const screens={
+    intro: document.getElementById('intro-screen'),
+    game: document.getElementById('game-screen'),
+    gameOver: document.getElementById('game-over')
+  };
+
+  const buttons = {
+    start: document.getElementById('start-btn'),
+    restart: document.getElementById('restart-btn'),
+    play: document.getElementById('play-btn'),
+    save: document.getElementById('save-btn')
+  };
+
+  const displays = {
+    score: document.getElementById('score'),
+    level: document.getElementById('level'),
+    finalScore: document.getElementById('final-score'),
+    message: document.getElementById('message'),
+    messageWrong: document.getElementById('messageWrong'),
+    art: document.getElementById('art-display'),
+    gallery: document.getElementById('gallery')
+  };
+
+// efficent code for the svg?
+  const shapes = Array.from({length: 4}, (_, i) => {
+    const element = document.getElementById(`shape-${i}`);
+    element.innerHTML = [raro, prisma, estrella, circle][i];
+    return element;
+});
 
 //Event listeners
-startBtn.addEventListener('click',startGame);
-restartBtn.addEventListener('click',restartGame);
-playBtn.addEventListener('click', playSequence);
+buttons.start.addEventListener('click',startGame);
+buttons.restart.addEventListener('click',restartGame);
+buttons.play.addEventListener('click', playSequence);
+
+
 
     shapes.forEach((shape, index) => {
          shape.addEventListener('click', () => {
             if (gameState.canPlayerInteract){
             playShape(index);
             const result= gameState.addPlayerMove(index);
-
+            
+            // wrong sequence
             if (!result.correct) {
                 showMessage(errorMessage);
                 setTimeout(endGame,1000);
                 return;
             }
-               //correct sequence
+             //correct sequence
             updateDisplay(result.score, result.level);
             showMessage(successMessage);
             
@@ -45,46 +68,47 @@ playBtn.addEventListener('click', playSequence);
             const newState= gameState.levelUp();
             updateDisplay(newState.score, newState.level);
             gameState.generateNextSequence();
-            playBtn.disabled=false;
+            buttons.play.disabled=false;
            }, 1500);
         }
    });
 });
 
 function startGame(){
-    introScreen.classList.remove('active');
-    gameScreen.classList.add('active')
+    screens.intro.classList.remove('active');
+    screens.game.classList.add('active')
     const state= gameState.resetGame();
     updateDisplay(state.score,state.level);
     gameState.generateNextSequence();
-    playBtn.disabled=false;
+    buttons.play.disabled=false;
     //artDisplay.style.display='none';
     //saveBtn.disabled =true;
 }
 
 function restartGame() {
-    gameOverScreen.classList.remove('active');
-    gameScreen.classList.add('active');
+    screens.gameOver.classList.remove('active');
+    screens.game.classList.add('active');
     const state= gameState.resetGame();
     updateDisplay(state.score,state.level);
     gameState.generateNextSequence();
-    playBtn.disabled=false;
+    buttons.play.disabled=false;
     //artDisplay.style.display='none';
     //saveBtn.disable=true;
 
 }
 
+//update the screen
 function updateDisplay(score,level) {
-    scoreDisplay.textContent= score;
-    levelDisplay.textContent= level;
-    finalScoreDisplay.textContent= score;
+    displays.score.textContent= score;
+    displays.level.textContent= level;
+    displays.finalScore.textContent= score;
 }
 
 function playSequence(){
   if (gameState.isPlaying) return;
 
   const sequence= gameState.startPlayingSequence();
-  playBtn.disabled= true;
+  buttons.play.disabled= true;
   //savebtn.disabled=true;
 
 // play the sequence
@@ -98,18 +122,36 @@ const interval = setInterval(() => {
             gameState.finishPlayingSequence();
         }, 500);
     }
-}, 1000);
+  }, 1000);
 }
 
 function playShape(index) {
+    // Highlight the shape
+    shapes[index].classList.add('active-shape');
+    setTimeout(() => {
+        shapes[index].classList.remove('active-shape');
+    }, 500);
+
+    // Play the sound
+    const soundInfo = gameState.soundMap[index];
+    const sound = new SoundObject(
+        audioCtx,
+        soundInfo.frequency,
+        soundInfo.type,
+        soundInfo.duration
+    );
 }
 
-function showMessage(element){
+function showMessage(element) {
+    element.classList.add('visible');
+    setTimeout(() => {
+        element.classList.remove('visible');
+    }, 1000);
 }
 
 function endGame(){
-    gameScreen.classList.remove('active');
-    gameOverScreen.classList.add('active');
+    screens.game.classList.remove('active');
+    screens.gameOver.classList.add('active');
 
      // Display saved artworks in the gallery
      //displayGallery(gallery, gameState.savedArtworks);
