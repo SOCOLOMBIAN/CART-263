@@ -133,3 +133,18 @@ button:disabled {
     border: 1px solid #fff;
     border-radius: 5px;
 }
+/* Add this to your main.css file */
+
+.active-shape {
+    transform: scale(1.2);
+    filter: brightness(1.5);
+    transition: all 0.2s ease;
+}
+
+/* Make sure art display is properly styled */
+.art-display {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    margin: 20px auto;
+    display: none;
+}
