@@ -77,12 +77,15 @@ addPlayerMove(shapeIndex) {
       };
     }
   
-    return { correct: true }; // Return true only if the move is correct and the sequence is not complete
+    return { 
+      correct: true,
+      completed:false
+
+    }; // Return true only if the move is correct and the sequence is not complete
   }
   
   levelUp(){
     this.level++;
-    this.soundMap = this.generateRandomSoundMap();
     return { score: this.score, level: this.level};
   }
 }  
