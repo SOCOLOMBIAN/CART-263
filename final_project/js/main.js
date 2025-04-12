@@ -46,9 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Initialize generative art canvas
-  const artDisplay = displays.art;
-  artDisplay.innerHTML = '<canvas width="300" height="300"></canvas>';
-  const artCanvas = artDisplay.querySelector('canvas');
+  displays.art.innerHTML = '<canvas width="300" height="300"></canvas>';
+  const artCanvas = displays.art.querySelector('canvas');
   const generativeArt = new GenerativeArt(artCanvas);
 
   // Event listeners
@@ -66,9 +65,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Wrong sequence
         if (!result.correct) {
           showMessage(errorMessage);
+          
           // Shake the screen and flash red
-          AnimationEffects.screenShake(screens.game, 10, 500);
-          AnimationEffects.flashBackground(document.body, 'rgba(255, 0, 0, 0.3)', 500);
+          document.body.classList.add('wrong-flash');
+          screens.game.classList.add('shake');
+          
+          setTimeout(() => {
+            document.body.classList.remove('wrong-flash');
+            screens.game.classList.remove('shake');
+          }, 500);
+          
           setTimeout(endGame, 1000);
           return;
         }
@@ -80,7 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
           showMessage(successMessage);
           
           // Flash green for success
-          AnimationEffects.flashBackground(document.body, 'rgba(0, 255, 0, 0.3)', 500);
+          document.body.classList.add('correct-flash');
+          setTimeout(() => {
+            document.body.classList.remove('correct-flash');
+          }, 500);
           
           // Generate art based on sequence
           generateArt(result.sequence, result.level);
@@ -150,7 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function playShape(index) {
     // Highlight the shape with animation
-    AnimationEffects.highlightShape(shapes[index]);
+    shapes[index].classList.add('active-shape');
+    setTimeout(() => {
+      shapes[index].classList.remove('active-shape');
+    }, 500);
 
     // Play the sound
     const soundInfo = gameState.soundMap[index];
@@ -170,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function generateArt(sequence, level) {
-    // Use the enhanced generative art system
+    // Use the generative art system
     generativeArt.generateArt(sequence, level);
     displays.art.style.display = 'block';
   }
