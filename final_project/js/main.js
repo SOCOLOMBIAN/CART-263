@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize the particle background
   const starBackground = new particleBackground('body', {
       particleCount: 100,
-      particleColor: '#ffffff',
+      particleColor: 'rgba(255, 255, 255, 0.8)',
       starSize: 2,
       twinkle: true
   });
@@ -38,41 +38,82 @@ document.addEventListener('DOMContentLoaded', () => {
   const successMessage = displays.message;
   const errorMessage = displays.messageWrong;
 
-  // get the container of the shapes 
-  const shapesContainer= document.querySelectorAll('.shapes-container');
-  shapesContainer.innerHTML= '';
-
-  //moving shapes container
-  shapesContainer.style.position='relative';
-  shapesContainer.style.height='300px';
-
-  const shapeSvgs= [raro,prisma,estrella,circle];
-
-  // initialize the moving shapes 
-  const movingShapes= new MovingShapes(shapesContainer, shapeSvgs, {
-  count: 2,
-  speed:{min: 0.5, max:1.2},
-  size: {min: 50, max: 70},
+  // Get the shapes container
+  const shapesContainer = document.querySelector('.shapes-container');
+  
+  // Remove static shapes
+  shapesContainer.innerHTML = '';
+  
+  // Set up container for moving shapes
+  shapesContainer.style.position = 'relative';
+  shapesContainer.style.height = '300px';
+  
+  // Shape SVGs
+  const shapeSvgs = [raro, prisma, estrella, circle];
+  
+  // Initialize moving shapes
+  const movingShapes = new MovingShapes(shapesContainer, shapeSvgs, {
+    count: 2, // 2 of each shape type (8 total shapes moving around)
+    speed: { min: 0.5, max: 1.2 },
+    size: { min: 50, max: 70 }
   });
-
-  //callback for the moving shapes
-  movingShapes.onShapeActivate= (data) => {
-
-    const soundInfo= gameState.soundMap[data.typeIndex];
-    const sound= new SoundObject(
+  
+  // Set up callbacks for the moving shapes
+  movingShapes.onShapeActivate = (data) => {
+    // Play sound for the activated shape
+    const soundInfo = gameState.soundMap[data.typeIndex];
+    const sound = new SoundObject(
       audioCtx,
       soundInfo.frequency,
       soundInfo.type,
       soundInfo.duration
     );
   };
-
-  movingShapes.onSequencePlay= (data) => {
+  
+  movingShapes.onSequencePlay = (data) => {
     if (data.ready) {
-      buttons.play.disable=false;
+      // Sequence finished playing, player can interact
+      buttons.play.disabled = false;
     }
   };
   
+  movingShapes.onSequenceComplete = (data) => {
+    if (data.success) {
+      // Update score and level
+      gameState.score += gameState.level * 10;
+      updateDisplay(gameState.score, gameState.level);
+      showMessage(successMessage);
+      
+      // Flash green for success
+      AnimationEffects.flashBackground(document.body, 'rgba(0, 255, 0, 0.2)', 500);
+      
+      // Generate art based on sequence
+      generateArt(data.sequence, gameState.level);
+      displays.art.style.display = 'block';
+      buttons.save.disabled = false;
+
+      // Add level-up animation
+      showLevelUpEffect();
+
+      setTimeout(() => {
+        const newState = gameState.levelUp();
+        updateDisplay(newState.score, newState.level);
+        gameState.generateNextSequence();
+        buttons.play.disabled = false;
+        movingShapes.reset();
+      }, 1500);
+    }
+  };
+  
+  movingShapes.onSequenceError = (data) => {
+    showMessage(errorMessage);
+    
+    // Shake the screen and flash red
+    AnimationEffects.screenShake(screens.game, 10, 500);
+    AnimationEffects.flashBackground(document.body, 'rgba(255, 0, 0, 0.2)', 500);
+    
+    setTimeout(endGame, 1000);
+  };
 
   // Add visual effects to buttons
   buttons.start.addEventListener('click', (e) => {
@@ -95,54 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
     saveArtwork();
   });
 
-  shapes.forEach((shape, index) => {
-    shape.addEventListener('click', (event) => {
-      AnimationEffects.createRipple(event, `rgba(${index * 60 + 100}, ${255 - index * 40}, ${index * 50 + 100}, 0.5)`);
-      
-      if (gameState.canPlayerInteract) {
-        playShape(index);
-        const result = gameState.addPlayerMove(index);
-        
-        // Wrong sequence
-        if (!result.correct) {
-          showMessage(errorMessage);
-          
-          // Shake the screen and flash red
-          AnimationEffects.screenShake(screens.game, 10, 500);
-          AnimationEffects.flashBackground(document.body, 'rgba(255, 0, 0, 0.2)', 500);
-          
-          setTimeout(endGame, 1000);
-          return;
-        }
-        
-        // If the player completed the sequence
-        if (result.score !== undefined) {
-          // Update displays
-          updateDisplay(result.score, result.level);
-          showMessage(successMessage);
-          
-          // Flash green for success
-          AnimationEffects.flashBackground(document.body, 'rgba(0, 255, 0, 0.2)', 500);
-          
-          // Generate art based on sequence
-          generateArt(result.sequence, result.level);
-          displays.art.style.display = 'block';
-          buttons.save.disabled = false;
-
-          // Add level-up animation
-          showLevelUpEffect();
-
-          setTimeout(() => {
-            const newState = gameState.levelUp();
-            updateDisplay(newState.score, newState.level);
-            gameState.generateNextSequence();
-            buttons.play.disabled = false;
-          }, 1500);
-        }
-      }
-    });
-  });
-
   function startGame() {
     screens.intro.classList.remove('active');
     screens.game.classList.add('active');
@@ -152,9 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     buttons.play.disabled = false;
     displays.art.style.display = 'none';
     buttons.save.disabled = true;
-    
-    // Show welcome animation
-    showWelcomeAnimation();
+    movingShapes.reset();
   }
 
   function restartGame() {
@@ -166,9 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     buttons.play.disabled = false;
     displays.art.style.display = 'none';
     buttons.save.disabled = true;
-    
-    // Show welcome animation
-    showWelcomeAnimation();
+    movingShapes.reset();
   }
 
   // Update the screen
@@ -180,53 +169,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function playSequence() {
     if (gameState.isPlaying) return;
-
+    
     const sequence = gameState.startPlayingSequence();
     buttons.play.disabled = true;
     buttons.save.disabled = true;
-
-    // Clear the canvas for new sequence
-    const ctx = gameCanvas.getContext('2d');
-    ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
-
-    // Play the sequence with animations on canvas
-    let i = 0;
-    const playNextShape = () => {
-      if (i < sequence.length) {
-        const shapeIndex = sequence[i];
-        playShape(shapeIndex);
-        
-        // Animate the shape on canvas
-        AnimationEffects.animateShapeOnCanvas(gameCanvas, shapeIndex, 800);
-        
-        i++;
-        setTimeout(playNextShape, 1000);
-      } else {
-        setTimeout(() => {
-          gameState.finishPlayingSequence();
-        }, 500);
-      }
-    };
     
-    // Start playing the sequence after a short delay
-    setTimeout(playNextShape, 500);
-  }
-
-  function playShape(index) {
-    // Highlight the shape with animation
-    shapes[index].classList.add('active-shape');
-    setTimeout(() => {
-      shapes[index].classList.remove('active-shape');
-    }, 500);
-
-    // Play the sound
-    const soundInfo = gameState.soundMap[index];
-    const sound = new SoundObject(
-      audioCtx,
-      soundInfo.frequency,
-      soundInfo.type,
-      soundInfo.duration
-    );
+    // Use the moving shapes to play the sequence
+    movingShapes.playSequence(sequence);
   }
 
   function showMessage(element) {
@@ -237,14 +186,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function generateArt(sequence, level) {
+    // Get the generative art canvas
+    if (!displays.art.querySelector('canvas')) {
+      displays.art.innerHTML = '<canvas width="300" height="300"></canvas>';
+    }
+    const artCanvas = displays.art.querySelector('canvas');
+    const generativeArt = new GenerativeArt(artCanvas);
+    
     // Use the generative art system
     generativeArt.generateArt(sequence, level);
     displays.art.style.display = 'block';
+    
+    // Store reference to generated art
+    gameState.currentArt = generativeArt;
   }
 
   function saveArtwork() {
     // Save the artwork to local storage
-    const artData = generativeArt.exportArt();
+    const artData = gameState.currentArt.exportArt();
     gameState.saveArtwork(artData);
     
     // Add to gallery
@@ -297,54 +256,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Show welcome animation with moving shapes
-  function showWelcomeAnimation() {
-    const ctx = gameCanvas.getContext('2d');
-    ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+  // // Show level up effect
+  // function showLevelUpEffect() {
+  //   // Create a level up text effect
+  //   const levelUpText = document.createElement('div');
+  //   levelUpText.textContent = 'LEVEL UP!';
+  //   levelUpText.style.position = 'absolute';
+  //   levelUpText.style.top = '50%';
+  //   levelUpText.style.left = '50%';
+  //   levelUpText.style.transform = 'translate(-50%, -50%)';
+  //   levelUpText.style.fontSize = '36px';
+  //   levelUpText.style.color = '#4CAF50';
+  //   levelUpText.style.fontWeight = 'bold';
+  //   levelUpText.style.textShadow = '0 0 10px rgba(76, 175, 80, 0.8)';
+  //   levelUpText.style.opacity = '0';
+  //   levelUpText.style.transition = 'opacity 0.5s, transform 1s';
     
-    // Show all shapes moving to introduce them
-    for (let i = 0; i < 4; i++) {
-      setTimeout(() => {
-        AnimationEffects.animateShapeOnCanvas(gameCanvas, i, 1000);
-      }, i * 300);
-    }
-  }
-
-  // Show level up effect
-  function showLevelUpEffect() {
-    // Create a level up text effect on canvas
-    const ctx = gameCanvas.getContext('2d');
-    const width = gameCanvas.width;
-    const height = gameCanvas.height;
+  //   screens.game.appendChild(levelUpText);
     
-    let opacity = 1;
-    let scale = 0.5;
+  //   // Show animation
+  //   setTimeout(() => {
+  //     levelUpText.style.opacity = '1';
+  //     levelUpText.style.transform = 'translate(-50%, -70%) scale(1.5)';
+  //   }, 100);
     
-    function animateLevelUp() {
-      ctx.clearRect(0, 0, width, height);
-      
-      // Draw level up text
-      ctx.save();
-      ctx.translate(width/2, height/2);
-      ctx.scale(scale, scale);
-      ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-      ctx.font = '36px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('LEVEL UP!', 0, 0);
-      ctx.restore();
-      
-      // Update animation parameters
-      opacity -= 0.02;
-      scale += 0.03;
-      
-      if (opacity > 0) {
-        requestAnimationFrame(animateLevelUp);
-      }
-    }
-    
-    animateLevelUp();
-  }
+  //   // Remove after animation
+  //   setTimeout(() => {
+  //     levelUpText.style.opacity = '0';
+  //     setTimeout(() => levelUpText.remove(), 500);
+  //   }, 1500);
+  // }
 
   // Resume audio context on user interaction
   window.addEventListener('click', () => {
@@ -353,9 +294,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, {once: true});
 });
-
-
-  // // Initialize generative art canvas
-  // displays.art.innerHTML = '<canvas width="300" height="300"></canvas>';
-  // const artCanvas = displays.art.querySelector('canvas');
-  // const generativeArt = new GenerativeArt(artCanvas);
