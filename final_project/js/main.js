@@ -42,22 +42,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const shapesContainer= document.querySelectorAll('.shapes-container');
   shapesContainer.innerHTML= '';
 
+  //moving shapes container
+  shapesContainer.style.position='relative';
+  shapesContainer.style.height='300px';
 
-  // Initialize canvas for game animations
-  const gameCanvas = document.createElement('canvas');
-  gameCanvas.width = 300;
-  gameCanvas.height = 300;
-  gameCanvas.style.marginBottom = '20px';
-  gameCanvas.style.borderRadius = '5px';
-  gameCanvas.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
-  gameCanvas.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+  const shapeSvgs= [raro,prisma,estrella,circle];
+
+  // initialize the moving shapes 
+  const movingShapes= new MovingShapes(shapesContainer, shapeSvgs, {
+  count: 2,
+  speed:{min: 0.5, max:1.2},
+  size: {min: 50, max: 70},
+  });
+
+  //callback for the moving shapes
+  movingShapes.onShapeActivate= (data) => {
+
+    const soundInfo= gameState.soundMap[data.typeIndex];
+    const sound= new SoundObject(
+      audioCtx,
+      soundInfo.frequency,
+      soundInfo.type,
+      soundInfo.duration
+    );
+  };
+
+  movingShapes.onSequencePlay= (data) => {
+    if (data.ready) {
+      buttons.play.disable=false;
+    }
+  };
   
-
-
-  // Initialize generative art canvas
-  displays.art.innerHTML = '<canvas width="300" height="300"></canvas>';
-  const artCanvas = displays.art.querySelector('canvas');
-  const generativeArt = new GenerativeArt(artCanvas);
 
   // Add visual effects to buttons
   buttons.start.addEventListener('click', (e) => {
@@ -338,3 +353,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, {once: true});
 });
+
+
+  // // Initialize generative art canvas
+  // displays.art.innerHTML = '<canvas width="300" height="300"></canvas>';
+  // const artCanvas = displays.art.querySelector('canvas');
+  // const generativeArt = new GenerativeArt(artCanvas);
