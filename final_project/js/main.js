@@ -7,30 +7,44 @@ document.addEventListener('DOMContentLoaded', () => {
       twinkle: true
   });
 
-  // Initialize audio context
+  // Initialize audio context with better error handling
   let audioCtx;
-  // Try to initialize audio context based on browser support
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    console.log("Audio context created successfully");
-  } catch (e) {
-    console.error("AudioContext not supported or blocked:", e);
-    // Fallback for browsers that don't support AudioContext
-    audioCtx = {
-      createOscillator: () => ({ 
-        frequency: { value: 0 },
-        connect: () => {},
-        start: () => {},
-        stop: () => {}
-      }),
-      createGain: () => ({
-        gain: { setValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} },
-        connect: () => {}
-      }),
-      destination: {},
-      currentTime: 0
-    };
+  let audioInitialized = false;
+  
+  // Function to initialize audio properly - can be called on user interaction
+  function initializeAudio() {
+    if (audioInitialized) return;
+    
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      console.log("Audio context created successfully");
+      audioInitialized = true;
+      
+      // Create a silent sound to "warm up" the audio context
+      const silent = new SoundObject(audioCtx, 0, 'sine', 0.1);
+    } catch (e) {
+      console.error("AudioContext not supported or blocked:", e);
+      // Fallback for browsers that don't support AudioContext
+      audioCtx = {
+        createOscillator: () => ({ 
+          frequency: { value: 0 },
+          connect: () => {},
+          start: () => {},
+          stop: () => {}
+        }),
+        createGain: () => ({
+          gain: { setValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} },
+          connect: () => {}
+        }),
+        destination: {},
+        currentTime: 0
+      };
+      audioInitialized = true;
+    }
   }
+  
+  // Try to initialize immediately - will likely be suspended in many browsers
+  initializeAudio();
 
   const gameState = new GameState();
 
@@ -85,15 +99,32 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Set up callbacks for the moving shapes
   movingShapes.onShapeActivate = (data) => {
+    // Make sure audio is initialized
+    if (!audioInitialized) {
+      initializeAudio();
+    }
+    
     // Play sound for the activated shape
     const soundInfo = gameState.soundMap[data.typeIndex];
     try {
-      const sound = new SoundObject(
-        audioCtx,
-        soundInfo.frequency,
-        soundInfo.type,
-        soundInfo.duration
-      );
+      // Make sure audio context is running
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().then(() => {
+          const sound = new SoundObject(
+            audioCtx,
+            soundInfo.frequency,
+            soundInfo.type,
+            soundInfo.duration
+          );
+        });
+      } else {
+        const sound = new SoundObject(
+          audioCtx,
+          soundInfo.frequency,
+          soundInfo.type,
+          soundInfo.duration
+        );
+      }
     } catch (e) {
       console.error("Error playing sound:", e);
     }
@@ -119,13 +150,25 @@ document.addEventListener('DOMContentLoaded', () => {
       // Add level-up animation
       showLevelUpEffect();
 
-      // Level up after a delay
+      // Level up after a delay - FIXED: Added proper sequence reset
       setTimeout(() => {
         const newState = gameState.levelUp();
         updateDisplay(newState.score, newState.level);
+        
+        // Generate next sequence and ensure game state is reset properly
         gameState.generateNextSequence();
+        gameState.isPlaying = false;  // Ensure isPlaying is reset
+        gameState.canPlayerInteract = false;  // Ensure player interaction state is correct
+        
+        // Ensure button is enabled
         buttons.play.disabled = false;
+        
+        // Reset moving shapes and ensure they're in the right state
         movingShapes.reset();
+        movingShapes.isPlayingSequence = false;
+        movingShapes.canPlayerInteract = false;
+        
+        console.log("Ready for next level sequence:", gameState.gameSequence);
       }, 1500);
     }
   };
@@ -206,15 +249,45 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function playSequence() {
-    if (gameState.isPlaying) return;
+    console.log("Play button clicked");
+    console.log("Current game state:", { 
+      isPlaying: gameState.isPlaying, 
+      sequence: gameState.gameSequence,
+      movingShapesPlaying: movingShapes.isPlayingSequence
+    });
+    
+    // Prevent multiple plays
+    if (gameState.isPlaying || movingShapes.isPlayingSequence) {
+      console.log("Already playing sequence - ignoring click");
+      return;
+    }
     
     console.log("Playing sequence");
     
     const sequence = gameState.startPlayingSequence();
     buttons.play.disabled = true;
     
-    // Use the moving shapes to play the sequence
-    movingShapes.playSequence(sequence);
+    // Check if sequence exists and has length
+    if (!sequence || sequence.length === 0) {
+      console.error("Sequence is empty or undefined!");
+      // Regenerate sequence if empty
+      gameState.generateNextSequence();
+      const newSequence = gameState.startPlayingSequence();
+      
+      if (!newSequence || newSequence.length === 0) {
+        console.error("Failed to generate new sequence");
+        buttons.play.disabled = false;
+        return;
+      } else {
+        console.log("Generated new sequence:", newSequence);
+        // Use the moving shapes to play the sequence
+        movingShapes.playSequence(newSequence);
+      }
+    } else {
+      console.log("Using existing sequence:", sequence);
+      // Use the moving shapes to play the sequence
+      movingShapes.playSequence(sequence);
+    }
   }
 
   function showMessage(element) {
@@ -271,8 +344,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1500);
   }
 
-  // Resume audio context on user interaction (needed for Chrome and other browsers)
-  window.addEventListener('click', () => {
+  // Initialize audio on first click anywhere in the document
+  document.addEventListener('click', () => {
+    initializeAudio();
+    
+    // Try to resume audio context if it's suspended
     if (audioCtx.state === 'suspended') {
       try {
         audioCtx.resume().then(() => {

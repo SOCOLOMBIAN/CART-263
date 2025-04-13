@@ -46,6 +46,8 @@ class MovingShapes {
     // Create SVG images for each shape type
     this.svgImages = [];
     
+    const loadPromises = [];
+    
     for (let i = 0; i < this.shapesData.length; i++) {
       const svgString = this.shapesData[i];
       // Convert SVG string to data URL
@@ -53,15 +55,20 @@ class MovingShapes {
       const url = URL.createObjectURL(svgBlob);
       const img = new Image();
       
-      // Make sure image loads before continuing
-      img.onload = () => {
-        console.log(`SVG image ${i} loaded successfully`);
-      };
+      // Create a promise for each image load
+      const loadPromise = new Promise((resolve, reject) => {
+        img.onload = () => {
+          console.log(`SVG image ${i} loaded successfully`);
+          resolve();
+        };
+        
+        img.onerror = (e) => {
+          console.error(`Error loading SVG image ${i}:`, e);
+          reject(e);
+        };
+      });
       
-      img.onerror = (e) => {
-        console.error(`Error loading SVG image ${i}:`, e);
-      };
-      
+      loadPromises.push(loadPromise);
       img.src = url;
       
       this.svgImages.push({
@@ -70,7 +77,29 @@ class MovingShapes {
       });
     }
     
-    console.log(`Preloaded ${this.svgImages.length} SVG images`);
+    // Wait for all images to load
+    Promise.all(loadPromises)
+      .then(() => {
+        console.log(`All ${this.svgImages.length} SVG images loaded successfully`);
+        // Redraw to ensure shapes are visible
+        this.redrawShapes();
+      })
+      .catch(error => {
+        console.error("Error loading SVG images:", error);
+      });
+  }
+  
+  // Add a new method to force redraw of all shapes
+  redrawShapes() {
+    if (!this.ctx) return;
+    
+    // Clear canvas
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    // Draw all shapes
+    for (const shape of this.shapes) {
+      this.drawShape(shape);
+    }
   }
   
   resizeCanvas() {
@@ -266,7 +295,25 @@ class MovingShapes {
   }
   
   playSequence(sequence) {
-    if (this.isPlayingSequence) return;
+    console.log("MovingShapes.playSequence called with:", sequence);
+    
+    if (this.isPlayingSequence) {
+      console.log("Already playing sequence - ignoring request");
+      return;
+    }
+    
+    if (!sequence || sequence.length === 0) {
+      console.error("Cannot play empty sequence");
+      
+      if (this.onSequencePlay) {
+        this.onSequencePlay({
+          sequence: [],
+          ready: true,
+          error: "Empty sequence"
+        });
+      }
+      return;
+    }
     
     this.activeSequence = [...sequence];
     this.playerSequence = [];
