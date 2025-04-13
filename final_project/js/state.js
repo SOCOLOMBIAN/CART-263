@@ -1,3 +1,4 @@
+//management of the game 
 class GameState {
     constructor() {
       this.gameSequence = [];
