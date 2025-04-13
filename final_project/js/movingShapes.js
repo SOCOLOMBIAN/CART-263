@@ -31,12 +31,32 @@ class MovingShapes {
     // Initialize shapes
     this.initShapes();
     
+    // Preload SVG images
+    this.preloadSVGImages();
+    
     // Event listeners
     window.addEventListener('resize', () => this.resizeCanvas());
     this.canvas.addEventListener('click', (e) => this.handleClick(e));
     
     // Start animation
     this.animate();
+  }
+  
+  preloadSVGImages() {
+    // Create SVG images for each shape type
+    this.svgImages = [];
+    
+    for (let i = 0; i < this.shapesData.length; i++) {
+      const svgBlob = new Blob([this.shapesData[i]], {type: 'image/svg+xml'});
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.src = url;
+      
+      this.svgImages.push({
+        image: img,
+        url: url
+      });
+    }
   }
   
   resizeCanvas() {
@@ -71,7 +91,6 @@ class MovingShapes {
           speedY: (Math.random() - 0.5) * this.randomRange(this.options.speed.min, this.options.speed.max) * 2,
           rotation: Math.random() * 360,
           rotationSpeed: (Math.random() - 0.5) * 2,
-          svg: this.shapesData[typeIndex],
           active: false,
           opacity: 0.7 + Math.random() * 0.3
         };
@@ -97,20 +116,20 @@ class MovingShapes {
       shape.rotation += shape.rotationSpeed;
       
       // Bounce off edges - with slight offset to avoid getting stuck
-      if (shape.x < -shape.size/2) {
+      if (shape.x < 0) {
         shape.speedX = Math.abs(shape.speedX);
-        shape.x = -shape.size/2 + 1;
-      } else if (shape.x > this.canvas.width - shape.size/2) {
+        shape.x = 1;
+      } else if (shape.x > this.canvas.width - shape.size) {
         shape.speedX = -Math.abs(shape.speedX);
-        shape.x = this.canvas.width - shape.size/2 - 1;
+        shape.x = this.canvas.width - shape.size - 1;
       }
       
-      if (shape.y < -shape.size/2) {
+      if (shape.y < 0) {
         shape.speedY = Math.abs(shape.speedY);
-        shape.y = -shape.size/2 + 1;
-      } else if (shape.y > this.canvas.height - shape.size/2) {
+        shape.y = 1;
+      } else if (shape.y > this.canvas.height - shape.size) {
         shape.speedY = -Math.abs(shape.speedY);
-        shape.y = this.canvas.height - shape.size/2 - 1;
+        shape.y = this.canvas.height - shape.size - 1;
       }
       
       // Draw shape
@@ -140,30 +159,19 @@ class MovingShapes {
       this.ctx.fill();
     }
     
-    // Create an SVG image for drawing
-    if (!shape.svgImage) {
-      const svgBlob = new Blob([shape.svg], {type: 'image/svg+xml'});
-      const url = URL.createObjectURL(svgBlob);
-      shape.svgImage = new Image();
-      shape.svgImage.src = url;
-      shape.svgUrl = url;
-    }
+    // Use preloaded SVG image
+    const svgImg = this.svgImages[shape.typeIndex];
     
-    // Draw the SVG if it's loaded
-    if (shape.svgImage.complete) {
-      const color = shape.active ? this.options.activeColor : this.options.inactiveColor;
-      
-      // Apply color filter
-      this.ctx.filter = shape.active ? 'brightness(1.5) saturate(1.5)' : `opacity(${shape.opacity})`;
+    if (svgImg && svgImg.image.complete) {
+      // Apply opacity
+      this.ctx.globalAlpha = shape.active ? 1.0 : shape.opacity;
       
       // Draw the image
       this.ctx.drawImage(
-        shape.svgImage,
+        svgImg.image,
         -shape.size/2, -shape.size/2,
         shape.size, shape.size
       );
-      
-      this.ctx.filter = 'none';
     }
     
     this.ctx.restore();

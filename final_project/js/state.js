@@ -87,13 +87,4 @@ class GameState {
       return { score: this.score, level: this.level };
     }
   
-    saveArtwork(artData) {
-      this.savedArtworks.push({
-        sequence: [...this.gameSequence],
-        level: this.level,
-        score: this.score,
-        art: artData
-      });
-      return this.savedArtworks;
-    }
   }
