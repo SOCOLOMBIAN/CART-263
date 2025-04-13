@@ -325,4 +325,5 @@ class MovingShapes {
       shape.speedY = (Math.random() - 0.5) * this.randomRange(this.options.speed.min, this.options.speed.max) * 2;
       shape.rotationSpeed = (Math.random() - 0.5) * 2;
     }
-  } 
+   } 
+}
