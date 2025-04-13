@@ -71,6 +71,9 @@ class MovingShapes {
     this.canvas.style.left = '0';
     this.canvas.style.width = '100%';
     this.canvas.style.height = '100%';
+    
+    // Make sure there's no overflow hidden constraint
+    this.container.style.overflow = 'visible';
   }
   
   initShapes() {
@@ -322,5 +325,4 @@ class MovingShapes {
       shape.speedY = (Math.random() - 0.5) * this.randomRange(this.options.speed.min, this.options.speed.max) * 2;
       shape.rotationSpeed = (Math.random() - 0.5) * 2;
     }
-  }
-}
+  } 

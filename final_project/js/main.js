@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const buttons = {
     start: document.getElementById('start-btn'),
     restart: document.getElementById('restart-btn'),
-    play: document.getElementById('play-btn'),
-    save: document.getElementById('save-btn')
+    play: document.getElementById('play-btn')
+    // Removed save button reference
   };
 
   const displays = {
@@ -30,8 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     finalScore: document.getElementById('final-score'),
     message: document.getElementById('message'),
     messageWrong: document.getElementById('messageWrong'),
-    art: document.getElementById('art-display'),
     gallery: document.getElementById('gallery')
+    // Removed art display reference
   };
 
   // Define message elements for easy reference
@@ -51,11 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Shape SVGs
   const shapeSvgs = [raro, prisma, estrella, circle];
   
-  // Initialize moving shapes
+  // Initialize moving shapes with improved settings for better movement
   const movingShapes = new MovingShapes(shapesContainer, shapeSvgs, {
     count: 2, // 2 of each shape type (8 total shapes moving around)
-    speed: { min: 0.5, max: 1.2 },
-    size: { min: 50, max: 70 }
+    speed: { min: 1.0, max: 2.0 }, // Increased speed for better visibility
+    size: { min: 60, max: 80 } // Increased size for better visibility
   });
   
   // Set up callbacks for the moving shapes
@@ -87,14 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Flash green for success
       AnimationEffects.flashBackground(document.body, 'rgba(0, 255, 0, 0.2)', 500);
       
-      // Generate art based on sequence
-      generateArt(data.sequence, gameState.level);
-      displays.art.style.display = 'block';
-      buttons.save.disabled = false;
-
       // Add level-up animation
       showLevelUpEffect();
 
+      // Level up after a delay
       setTimeout(() => {
         const newState = gameState.levelUp();
         updateDisplay(newState.score, newState.level);
@@ -130,11 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
     AnimationEffects.createRipple(e, 'rgba(33, 150, 243, 0.5)');
     playSequence();
   });
-  
-  buttons.save.addEventListener('click', (e) => {
-    AnimationEffects.createRipple(e, 'rgba(255, 193, 7, 0.5)');
-    saveArtwork();
-  });
 
   function startGame() {
     screens.intro.classList.remove('active');
@@ -143,8 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDisplay(state.score, state.level);
     gameState.generateNextSequence();
     buttons.play.disabled = false;
-    displays.art.style.display = 'none';
-    buttons.save.disabled = true;
     movingShapes.reset();
   }
 
@@ -155,8 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDisplay(state.score, state.level);
     gameState.generateNextSequence();
     buttons.play.disabled = false;
-    displays.art.style.display = 'none';
-    buttons.save.disabled = true;
     movingShapes.reset();
   }
 
@@ -172,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const sequence = gameState.startPlayingSequence();
     buttons.play.disabled = true;
-    buttons.save.disabled = true;
     
     // Use the moving shapes to play the sequence
     movingShapes.playSequence(sequence);
@@ -185,75 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
   }
 
-  function generateArt(sequence, level) {
-    // Get the generative art canvas
-    if (!displays.art.querySelector('canvas')) {
-      displays.art.innerHTML = '<canvas width="300" height="300"></canvas>';
-    }
-    const artCanvas = displays.art.querySelector('canvas');
-    const generativeArt = new GenerativeArt(artCanvas);
-    
-    // Use the generative art system
-    generativeArt.generateArt(sequence, level);
-    displays.art.style.display = 'block';
-    
-    // Store reference to generated art
-    gameState.currentArt = generativeArt;
-  }
-
-  function saveArtwork() {
-    // Save the artwork to local storage
-    const artData = gameState.currentArt.exportArt();
-    gameState.saveArtwork(artData);
-    
-    // Add to gallery
-    addToGallery(artData);
-    
-    buttons.save.disabled = true;
-    showMessage(successMessage);
-    
-    // Animation effect for saving
-    AnimationEffects.flashBackground(displays.art, 'rgba(255, 255, 255, 0.3)', 500);
-  }
-  
-  function addToGallery(artData) {
-    const galleryItem = document.createElement('div');
-    galleryItem.className = 'gallery-item';
-    
-    const img = document.createElement('img');
-    img.src = artData;
-    img.alt = 'Generated Artwork';
-    img.style.width = '100%';
-    img.style.height = '100%';
-    
-    // Add animation to gallery items
-    galleryItem.style.opacity = '0';
-    galleryItem.style.transform = 'scale(0.8)';
-    galleryItem.style.transition = 'all 0.5s ease';
-    
-    galleryItem.appendChild(img);
-    displays.gallery.appendChild(galleryItem);
-    
-    // Trigger animation
-    setTimeout(() => {
-      galleryItem.style.opacity = '1';
-      galleryItem.style.transform = 'scale(1)';
-    }, 50);
-  }
-
   function endGame() {
     screens.game.classList.remove('active');
     screens.gameOver.classList.add('active');
     
     // Clear old gallery items
     displays.gallery.innerHTML = '';
-    
-    // Display saved artworks in gallery with a staggered animation
-    gameState.savedArtworks.forEach((artwork, index) => {
-      setTimeout(() => {
-        addToGallery(artwork.art);
-      }, index * 200);
-    });
   }
 
   // Show level up effect
@@ -265,12 +188,13 @@ document.addEventListener('DOMContentLoaded', () => {
     levelUpText.style.top = '50%';
     levelUpText.style.left = '50%';
     levelUpText.style.transform = 'translate(-50%, -50%)';
-    levelUpText.style.fontSize = '36px';
+    levelUpText.style.fontSize = '48px'; // Increased size
     levelUpText.style.color = '#4CAF50';
     levelUpText.style.fontWeight = 'bold';
-    levelUpText.style.textShadow = '0 0 10px rgba(76, 175, 80, 0.8)';
+    levelUpText.style.textShadow = '0 0 15px rgba(76, 175, 80, 0.8)';
     levelUpText.style.opacity = '0';
     levelUpText.style.transition = 'opacity 0.5s, transform 1s';
+    levelUpText.style.zIndex = '100'; // Make sure it appears on top
     
     screens.game.appendChild(levelUpText);
     
