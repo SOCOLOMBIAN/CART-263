@@ -1,121 +1,126 @@
-class GameParticles {
-  constructor(canvas) {
-    this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
-    this.particles = [];
-    this.fireworks = [];
+class particleBackground {
+    constructor(selector, options = {}) {
+      // Set default options
+      this.options = {
+        particleCount: options.particleCount || 100,
+        particleColor: options.particleColor || '#ffffff',
+        starSize: options.starSize || 2,
+        twinkle: options.twinkle !== undefined ? options.twinkle : true,
+        speed: options.speed || 0.1,
+        minOpacity: options.minOpacity || 0.1,
+        maxOpacity: options.maxOpacity || 0.7
+      };
+      
+      // Create canvas element
+      this.canvas = document.createElement('canvas');
+      this.ctx = this.canvas.getContext('2d');
+      
+      // Apply styles to make it a background
+      this.canvas.style.position = 'fixed';
+      this.canvas.style.top = '0';
+      this.canvas.style.left = '0';
+      this.canvas.style.width = '100%';
+      this.canvas.style.height = '100%';
+      this.canvas.style.zIndex = '-1';
+      this.canvas.style.pointerEvents = 'none';
+      
+      // Append to specified element or to body
+      const container = document.querySelector(selector) || document.body;
+      container.appendChild(this.canvas);
+      
+      // Initialize particles
+      this.particles = [];
+      this.resizeCanvas();
+      this.createParticles();
+      
+      // Start animation
+      this.animate();
+      
+      // Handle window resize
+      window.addEventListener('resize', () => this.resizeCanvas());
+    }
     
-    this.animate();
-  }
-  
-  animate() {
-    // Clear canvas with transparency
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
-    // Update and draw particles
-    for (let i = this.particles.length - 1; i >= 0; i--) {
-      const p = this.particles[i];
+    resizeCanvas() {
+      this.canvas.width = window.innerWidth;
+      this.canvas.height = window.innerHeight;
       
-      // Update position
-      p.x += p.vx;
-      p.y += p.vy;
-      
-      // Apply gravity
-      p.vy += p.gravity;
-      
-      // Update life
-      p.life -= p.decay;
-      
-      // Remove dead particles
-      if (p.life <= 0) {
-        this.particles.splice(i, 1);
-        continue;
+      // Recreate particles when canvas size changes
+      if (this.particles.length > 0) {
+        this.particles = [];
+        this.createParticles();
       }
-      
-      // Draw particle
-      this.ctx.globalAlpha = p.life;
-      this.ctx.fillStyle = p.color;
-      this.ctx.beginPath();
-      this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      this.ctx.fill();
     }
     
-    // Update and draw fireworks
-    for (let i = this.fireworks.length - 1; i >= 0; i--) {
-      const fw = this.fireworks[i];
-      
-      // Update position
-      fw.x += fw.vx;
-      fw.y += fw.vy;
-      
-      // Apply gravity
-      fw.vy += fw.gravity;
-      
-      // Check if it's time to explode
-      if (fw.vy >= 0 || fw.y <= fw.targetY) {
-        // Create explosion
-        this.createExplosion(fw.x, fw.y, fw.color);
-        
-        // Remove firework
-        this.fireworks.splice(i, 1);
-        continue;
-      }
-      
-      // Draw firework
-      this.ctx.fillStyle = fw.color;
-      this.ctx.beginPath();
-      this.ctx.arc(fw.x, fw.y, fw.size, 0, Math.PI * 2);
-      this.ctx.fill();
-      
-      // Draw trail
-      this.ctx.strokeStyle = fw.color;
-      this.ctx.lineWidth = 1;
-      this.ctx.beginPath();
-      this.ctx.moveTo(fw.x, fw.y);
-      this.ctx.lineTo(fw.x - fw.vx * 4, fw.y - fw.vy * 4);
-      this.ctx.stroke();
-    }
-    
-    requestAnimationFrame(() => this.animate());
-  }
-  
-  createExplosion(x, y, color, particleCount = 50) {
-    for (let i = 0; i < particleCount; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 1 + Math.random() * 5;
-      
-      this.particles.push({
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        size: 1 + Math.random() * 3,
-        color,
-        gravity: 0.05,
-        life: 0.7 + Math.random() * 0.3,
-        decay: 0.01 + Math.random() * 0.01
-      });
-    }
-  }
-  
-  createFireworks(count = 5) {
-    for (let i = 0; i < count; i++) {
-      setTimeout(() => {
-        const x = Math.random() * this.canvas.width;
-        const targetY = Math.random() * this.canvas.height * 0.5;
-        
-        this.fireworks.push({
-          x,
-          y: this.canvas.height,
-          targetY,
-          vx: (Math.random() - 0.5) * 2,
-          vy: -10 - Math.random() * 5,
-          size: 2 + Math.random() * 2,
-          color: `hsl(${Math.random() * 360}, 70%, 60%)`,
-          gravity: 0.2
+    createParticles() {
+      for (let i = 0; i < this.options.particleCount; i++) {
+        this.particles.push({
+          x: Math.random() * this.canvas.width,
+          y: Math.random() * this.canvas.height,
+          size: Math.random() * this.options.starSize + 0.5,
+          opacity: Math.random() * (this.options.maxOpacity - this.options.minOpacity) + this.options.minOpacity,
+          speed: Math.random() * this.options.speed + 0.05,
+          increasing: Math.random() > 0.5
         });
-      }, i * 300);
+      }
+    }
+    
+    animate() {
+      // Clear canvas
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      
+      // Update and draw particles
+      for (let i = 0; i < this.particles.length; i++) {
+        const p = this.particles[i];
+        
+        // Draw particle
+        this.ctx.beginPath();
+        this.ctx.fillStyle = `rgba(${this.hexToRgb(this.options.particleColor)}, ${p.opacity})`;
+        this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Move particle slowly upward
+        p.y -= p.speed;
+        
+        // Reset position if out of bounds
+        if (p.y < -10) {
+          p.y = this.canvas.height + 10;
+          p.x = Math.random() * this.canvas.width;
+        }
+        
+        // Twinkle effect
+        if (this.options.twinkle) {
+          if (p.increasing) {
+            p.opacity += 0.005;
+            if (p.opacity >= this.options.maxOpacity) {
+              p.increasing = false;
+            }
+          } else {
+            p.opacity -= 0.005;
+            if (p.opacity <= this.options.minOpacity) {
+              p.increasing = true;
+            }
+          }
+        }
+      }
+      
+      requestAnimationFrame(() => this.animate());
+    }
+    
+    // Helper method to convert hex to rgb
+    hexToRgb(hex) {
+      // Remove # if present
+      hex = hex.replace('#', '');
+      
+      // Convert 3-digit hex to 6-digit
+      if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      }
+      
+      // Parse the hex values
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      
+      return `${r}, ${g}, ${b}`;
     }
   }
-}
-

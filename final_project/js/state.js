@@ -48,6 +48,7 @@ class GameState {
       return [...this.gameSequence];
     }
   
+    // user finish to play the sequence 
     finishPlayingSequence() {
       this.isPlaying = false;
       this.canPlayerInteract = true;
@@ -61,7 +62,7 @@ class GameState {
   
       // Check if the move is correct
       if (this.playerSequence[currentMove] !== this.gameSequence[currentMove]) {
-        return { correct: false }; // Return false if the move is incorrect
+        return { correct: false }; // Return false if the move of the user is incorrect
       }
   
       // Check if the sequence is complete
