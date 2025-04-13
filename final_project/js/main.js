@@ -38,12 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const successMessage = displays.message;
   const errorMessage = displays.messageWrong;
 
-  // Shapes array
-  const shapes = Array.from({length: 4}, (_, i) => {
-    const element = document.getElementById(`shape-${i}`);
-    element.innerHTML = [raro, prisma, estrella, circle][i];
-    return element;
-  });
+  // get the container of the shapes 
+  const shapesContainer= document.querySelectorAll('.shapes-container');
+  shapesContainer.innerHTML= '';
+
 
   // Initialize canvas for game animations
   const gameCanvas = document.createElement('canvas');
@@ -54,9 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   gameCanvas.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
   gameCanvas.style.border = '1px solid rgba(255, 255, 255, 0.2)';
   
-  // Insert canvas before shapes container
-  const shapesContainer = document.querySelector('.shapes-container');
-  shapesContainer.parentNode.insertBefore(gameCanvas, shapesContainer);
+
 
   // Initialize generative art canvas
   displays.art.innerHTML = '<canvas width="300" height="300"></canvas>';
