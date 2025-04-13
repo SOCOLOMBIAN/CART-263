@@ -36,7 +36,9 @@ class AnimationEffects {
   
   // Flash the background with a color
   static flashBackground(element, color, duration = 500) {
-    const originalColor = element.style.backgroundColor;
+    // Store original background color
+    const computedStyle = window.getComputedStyle(element);
+    const originalColor = computedStyle.backgroundColor;
     
     // Set flash color
     element.style.backgroundColor = color;
@@ -57,86 +59,6 @@ class AnimationEffects {
     }, duration);
   }
   
-  // Animate shape movement on canvas
-  static animateShapeOnCanvas(canvasElement, shapeIndex, duration = 1000) {
-    const canvas = canvasElement;
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
-    
-    // Create a temporary SVG element to render the shape
-    const tempSvg = document.createElement('div');
-    tempSvg.innerHTML = [raro, prisma, estrella, circle][shapeIndex];
-    const svgElement = tempSvg.firstChild;
-    
-    // Convert SVG to image for canvas rendering
-    const data = new XMLSerializer().serializeToString(svgElement);
-    const img = new Image();
-    const svgBlob = new Blob([data], {type: 'image/svg+xml'});
-    const url = URL.createObjectURL(svgBlob);
-    
-    // Start position (center)
-    const centerX = width / 2;
-    const centerY = height / 2;
-    
-    // Random target position within canvas (not too close to edges)
-    const targetX = width * 0.2 + Math.random() * width * 0.6;
-    const targetY = height * 0.2 + Math.random() * height * 0.6;
-    
-    // Animation variables
-    const startTime = performance.now();
-    const size = 80;
-    
-    function animate(currentTime) {
-      // Calculate progress (0 to 1)
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      // Clear the canvas for this animation frame
-      ctx.clearRect(0, 0, width, height);
-      
-      // Calculate current position with easing
-      const easeProgress = AnimationEffects.easeInOutQuad(progress);
-      const currentX = centerX + (targetX - centerX) * easeProgress;
-      const currentY = centerY + (targetY - centerY) * easeProgress;
-      
-      // Scale effect - grow and shrink
-      const scale = 1 + 0.3 * Math.sin(progress * Math.PI);
-      
-      // Draw the SVG as an image with rotation
-      ctx.save();
-      ctx.translate(currentX, currentY);
-      ctx.rotate(progress * Math.PI * 2); // Rotate fully once
-      ctx.scale(scale, scale);
-      
-      // The image might not be loaded immediately, so check
-      if (img.complete) {
-        ctx.drawImage(img, -size/2, -size/2, size, size);
-      }
-      
-      ctx.restore();
-      
-      // Continue animation if not complete
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        // Clean up
-        URL.revokeObjectURL(url);
-      }
-    }
-    
-    // Start animation when image loads
-    img.onload = () => {
-      requestAnimationFrame(animate);
-    };
-    img.src = url;
-  }
-  
-  // Easing function for smoother animations
-  static easeInOutQuad(t) {
-    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-  }
-  
   // Create a ripple effect on click
   static createRipple(event, color = 'rgba(255, 255, 255, 0.4)') {
     const button = event.currentTarget;
@@ -145,10 +67,13 @@ class AnimationEffects {
     const diameter = Math.max(button.clientWidth, button.clientHeight);
     const radius = diameter / 2;
     
+    // Get the button's position
+    const rect = button.getBoundingClientRect();
+    
     // Position and style the ripple
     circle.style.width = circle.style.height = `${diameter}px`;
-    circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
-    circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
+    circle.style.left = `${event.clientX - rect.left - radius}px`;
+    circle.style.top = `${event.clientY - rect.top - radius}px`;
     circle.style.position = 'absolute';
     circle.style.borderRadius = '50%';
     circle.style.backgroundColor = color;
@@ -180,5 +105,53 @@ class AnimationEffects {
     // Add and clean up
     button.appendChild(circle);
     setTimeout(() => circle.remove(), 600);
+  }
+  
+  // Easing function for smoother animations
+  static easeInOutQuad(t) {
+    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  }
+  
+  // Pulse animation for an element
+  static pulseElement(element, scale = 1.1, duration = 500) {
+    // Store original transform
+    const originalTransform = element.style.transform || 'scale(1)';
+    
+    // Add transition property if not present
+    const originalTransition = element.style.transition;
+    element.style.transition = `transform ${duration/2}ms ease-in-out`;
+    
+    // Scale up
+    element.style.transform = `${originalTransform.includes('scale') ? originalTransform : originalTransform + ' scale(1)'} scale(${scale})`;
+    
+    // Scale back down
+    setTimeout(() => {
+      element.style.transform = originalTransform;
+      
+      // Reset transition
+      setTimeout(() => {
+        element.style.transition = originalTransition;
+      }, duration/2);
+    }, duration/2);
+  }
+  
+  // Create a floating animation for elements
+  static floatElement(element, duration = 2000, distance = 15) {
+    // Create animation if not already in document
+    if (!document.querySelector('style#float-animation')) {
+      const style = document.createElement('style');
+      style.id = 'float-animation';
+      style.textContent = `
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-${distance}px); }
+          100% { transform: translateY(0px); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    // Apply animation
+    element.style.animation = `float ${duration}ms ease-in-out infinite`;
   }
 }

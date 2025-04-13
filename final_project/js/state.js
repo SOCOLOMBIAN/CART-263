@@ -1,4 +1,4 @@
-//management of the game 
+// GameState class - manages the game state
 class GameState {
   constructor() {
     this.gameSequence = [];
@@ -8,7 +8,7 @@ class GameState {
     this.isPlaying = false;
     this.canPlayerInteract = false;
     this.soundMap = this.generateRandomSoundMap();
-    this.savedArtworks = []; // Keeping this for compatibility, but we won't use it
+    this.savedArtworks = []; // Keeping this for compatibility
   }
 
   resetGame() {
@@ -20,6 +20,7 @@ class GameState {
     this.canPlayerInteract = false;
     this.soundMap = this.generateRandomSoundMap();
 
+    console.log("Game state reset");
     return {
       score: this.score,
       level: this.level
@@ -27,7 +28,7 @@ class GameState {
   }
 
   generateRandomSoundMap() {
-    // Create more distinctive sounds for better game experience
+    // Create distinctive sounds for each shape type
     return [
       {
         frequency: 261.63, // C4
@@ -70,21 +71,24 @@ class GameState {
       this.gameSequence.push(nextShape);
     }
     
+    console.log(`Generated sequence for level ${this.level}:`, this.gameSequence);
     return [...this.gameSequence];
   }
 
-  // Playing the sequence 
+  // Start playing the sequence 
   startPlayingSequence() {
     this.isPlaying = true;
     this.canPlayerInteract = false;
     this.playerSequence = [];
+    console.log("Starting to play sequence:", this.gameSequence);
     return [...this.gameSequence];
   }
 
-  // user finish to play the sequence 
+  // User finished playing the sequence 
   finishPlayingSequence() {
     this.isPlaying = false;
     this.canPlayerInteract = true;
+    console.log("Finished playing sequence, ready for player input");
   }
 
   addPlayerMove(shapeIndex) {
@@ -92,9 +96,12 @@ class GameState {
 
     this.playerSequence.push(shapeIndex);
     const currentMove = this.playerSequence.length - 1;
+    
+    console.log(`Player move: ${shapeIndex}, expected: ${this.gameSequence[currentMove]}`);
 
     // Check if the move is correct
     if (this.playerSequence[currentMove] !== this.gameSequence[currentMove]) {
+      console.log("Incorrect move!");
       return { correct: false }; // Return false if the move of the user is incorrect
     }
 
@@ -102,6 +109,7 @@ class GameState {
     if (this.playerSequence.length === this.gameSequence.length) {
       this.score += this.level * 10;
       this.canPlayerInteract = false;
+      console.log("Sequence complete! Score:", this.score);
       return {
         correct: true,
         score: this.score,
@@ -115,6 +123,7 @@ class GameState {
 
   levelUp() {
     this.level++;
+    console.log("Level up! New level:", this.level);
     return { score: this.score, level: this.level };
   }
 }
