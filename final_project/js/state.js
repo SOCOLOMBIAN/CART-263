@@ -5,8 +5,10 @@ class GameState {
     this.playerSequence = [];
     this.score = 0;
     this.level = 1;
+    // game state
     this.isPlaying = false;
     this.canPlayerInteract = false;
+    // audio configuration
     this.soundMap = this.generateRandomSoundMap();
   }
 
@@ -54,15 +56,12 @@ class GameState {
 
   // Generate next sequence based on level
   generateNextSequence() {
-    // For levels > 1, keep the existing sequence and add new elements
     if (this.level === 1) {
       // Reset sequence for level 1
       this.gameSequence = [];
     }
     
     // Add elements based on the current level
-    // Level 1: Add 2 elements
-    // Level 2+: Add 1 more element
     const elementsToAdd = (this.level === 1) ? 2 : 1;
     
     for (let i = 0; i < elementsToAdd; i++) {
@@ -99,7 +98,7 @@ class GameState {
     
     console.log(`Player move: ${shapeIndex}, expected: ${this.gameSequence[currentMove]}`);
 
-    // Check if the move is correct
+    // Check if the move is correct, if not wrong message
     if (this.playerSequence[currentMove] !== this.gameSequence[currentMove]) {
       console.log("Incorrect move!");
       return { correct: false }; // Return false if the move is incorrect
@@ -121,7 +120,8 @@ class GameState {
 
     return { correct: true }; // Move is correct but sequence not complete
   }
-
+  
+  // increment the level when the user succes
   levelUp() {
     this.level++;
     console.log("Level up! New level:", this.level);
