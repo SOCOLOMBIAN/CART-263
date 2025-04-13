@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
   shapesContainer.style.position = 'relative';
   shapesContainer.style.height = '400px';
   
-  // Make sure shapes are defined
+  // Make sure shapes are defined - these are the SVG shapes from shapes.js
   console.log("Shape SVGs loaded:", { raro, prisma, estrella, circle });
   
   // Shape SVGs
@@ -92,9 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initialize moving shapes with improved settings for better visibility
   const movingShapes = new MovingShapes(shapesContainer, shapeSvgs, {
-    count: 2, // 2 of each shape type (8 total shapes moving around)
-    speed: { min: 0.8, max: 1.8 }, // Balanced speed for better visibility
-    size: { min: 60, max: 80 } // Increased size for better visibility
+    count: 1, // Reduced to 1 of each shape type (4 total) for simplicity
+    speed: { min: 0.5, max: 1.2 }, // Slowed down for better visibility
+    size: { min: 70, max: 90 } // Increased size for better visibility and interaction
   });
   
   // Set up callbacks for the moving shapes
@@ -134,6 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (data.ready) {
       // Sequence finished playing, player can interact
       buttons.play.disabled = false;
+      
+      // FIXED: Now explicitly enables player interaction
+      movingShapes.canPlayerInteract = true;
+      console.log("Sequence finished playing, player can now interact");
     }
   };
   
@@ -308,7 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Add a simple game over message
     const gameOverMsg = document.createElement('div');
-    gameOverMsg.innerHTML = `<p>Thanks for playing! You reached level ${gameState.level}!</p>`;
+    gameOverMsg.innerHTML = `<p>Thanks for playing! You reached level ${gameState.level}!</p>
+                           <p>Your final score: ${gameState.score}</p>`;
     displays.gallery.appendChild(gameOverMsg);
   }
 

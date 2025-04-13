@@ -8,7 +8,6 @@ class GameState {
     this.isPlaying = false;
     this.canPlayerInteract = false;
     this.soundMap = this.generateRandomSoundMap();
-    this.savedArtworks = []; // Keeping this for compatibility
   }
 
   resetGame() {
@@ -18,7 +17,7 @@ class GameState {
     this.level = 1;
     this.isPlaying = false;
     this.canPlayerInteract = false;
-    this.soundMap = this.generateRandomSoundMap();
+    this.soundMap = this.generateRandomSoundMap(); // Refresh sounds for new game
 
     console.log("Game state reset");
     return {
@@ -62,11 +61,12 @@ class GameState {
     }
     
     // Add elements based on the current level
-    // For level 1, add 2 elements
-    // For higher levels, add 1 more element
+    // Level 1: Add 2 elements
+    // Level 2+: Add 1 more element
     const elementsToAdd = (this.level === 1) ? 2 : 1;
     
     for (let i = 0; i < elementsToAdd; i++) {
+      // Generate random shape index (0-3)
       const nextShape = Math.floor(Math.random() * 4);
       this.gameSequence.push(nextShape);
     }
@@ -102,11 +102,12 @@ class GameState {
     // Check if the move is correct
     if (this.playerSequence[currentMove] !== this.gameSequence[currentMove]) {
       console.log("Incorrect move!");
-      return { correct: false }; // Return false if the move of the user is incorrect
+      return { correct: false }; // Return false if the move is incorrect
     }
 
     // Check if the sequence is complete
     if (this.playerSequence.length === this.gameSequence.length) {
+      // Calculate score based on level (higher levels = more points)
       this.score += this.level * 10;
       this.canPlayerInteract = false;
       console.log("Sequence complete! Score:", this.score);
@@ -118,7 +119,7 @@ class GameState {
       };
     }
 
-    return { correct: true }; // Return true if move is correct but sequence not complete
+    return { correct: true }; // Move is correct but sequence not complete
   }
 
   levelUp() {

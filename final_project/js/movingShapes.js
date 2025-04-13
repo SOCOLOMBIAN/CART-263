@@ -3,12 +3,12 @@ class MovingShapes {
     this.container = typeof container === 'string' ? document.querySelector(container) : container;
     this.shapesData = shapesData; // Array of SVG strings
     this.options = {
-      count: options.count || 3, // Number of each shape type
-      speed: options.speed || { min: 0.5, max: 1.5 },
-      size: options.size || { min: 40, max: 70 },
+      count: options.count || 1, // Number of each shape type (simplified)
+      speed: options.speed || { min: 0.5, max: 1.2 },
+      size: options.size || { min: 70, max: 90 }, // Larger shapes for better interaction
       activeColor: options.activeColor || '#4CAF50', // Green highlight when active
       inactiveColor: options.inactiveColor || '#ffffff', // Normal color
-      clickableRadius: options.clickableRadius || 50,
+      clickableRadius: options.clickableRadius || 50, // Increased for easier clicking
       ...options
     };
     
@@ -127,18 +127,26 @@ class MovingShapes {
       for (let i = 0; i < this.options.count; i++) {
         // Random position, size, and speed
         const size = this.randomRange(this.options.size.min, this.options.size.max);
+        
+        // Set initial positions to be well-spaced
+        // Calculate position based on the number of the shape type
+        // This ensures all shapes are visible and not on top of each other
+        const section = this.canvas.width / this.shapesData.length;
+        const x = (section * typeIndex) + (section - size) * Math.random() * 0.7;
+        const y = Math.random() * (this.canvas.height - size);
+        
         const shape = {
           id: `shape-${typeIndex}-${i}`,
           typeIndex: typeIndex, // Type of shape (0, 1, 2, 3)
-          x: Math.random() * (this.canvas.width - size),
-          y: Math.random() * (this.canvas.height - size),
+          x: x,
+          y: y,
           size: size,
           speedX: (Math.random() - 0.5) * this.randomRange(this.options.speed.min, this.options.speed.max) * 2,
           speedY: (Math.random() - 0.5) * this.randomRange(this.options.speed.min, this.options.speed.max) * 2,
           rotation: Math.random() * 360,
           rotationSpeed: (Math.random() - 0.5) * 2,
           active: false,
-          opacity: 0.7 + Math.random() * 0.3
+          opacity: 0.8 + Math.random() * 0.2 // Increased base opacity for better visibility
         };
         
         this.shapes.push(shape);
@@ -184,6 +192,15 @@ class MovingShapes {
       this.drawShape(shape);
     }
     
+    // Add visual cue when player can interact
+    if (this.canPlayerInteract) {
+      this.ctx.save();
+      this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      this.ctx.font = '16px Arial';
+      this.ctx.fillText('Your Turn! Click on the shapes in sequence', 20, 30);
+      this.ctx.restore();
+    }
+    
     // Continue animation
     requestAnimationFrame(() => this.animate());
   }
@@ -226,11 +243,40 @@ class MovingShapes {
       }
     }
     
+    // Draw a subtle border around the shapes to make them more visible
+    if (!shape.active) {
+      this.ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+      this.ctx.lineWidth = 2;
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, shape.size/2 - 2, 0, Math.PI * 2);
+      this.ctx.stroke();
+    }
+    
     this.ctx.restore();
   }
   
   handleClick(event) {
-    if (!this.canPlayerInteract) return;
+    // FIXED: Add debugging to check player interaction state
+    console.log("Shape clicked, canPlayerInteract:", this.canPlayerInteract);
+    
+    if (!this.canPlayerInteract) {
+      // FIXED: Add visual feedback when player clicks but interaction is disabled
+      const rect = this.canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      
+      // Show a small visual feedback that clicking is not allowed yet
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, 20, 0, Math.PI * 2);
+      this.ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+      this.ctx.fill();
+      this.ctx.restore();
+      
+      // Make the feedback disappear after a short time
+      setTimeout(() => this.redrawShapes(), 300);
+      return;
+    }
     
     // Get click position relative to canvas
     const rect = this.canvas.getBoundingClientRect();
@@ -238,15 +284,34 @@ class MovingShapes {
     const y = event.clientY - rect.top;
     
     // Check if a shape was clicked
+    let shapeClicked = false;
     for (const shape of this.shapes) {
       const centerX = shape.x + shape.size/2;
       const centerY = shape.y + shape.size/2;
       const distance = Math.sqrt((x - centerX)**2 + (y - centerY)**2);
       
-      if (distance <= this.options.clickableRadius) {
+      // FIXED: Increased clickable radius for easier interaction
+      const clickRadius = Math.max(this.options.clickableRadius, shape.size/2);
+      
+      if (distance <= clickRadius) {
+        console.log(`Shape clicked: type=${shape.typeIndex}`);
         this.handleShapeClick(shape);
+        shapeClicked = true;
         break;
       }
+    }
+    
+    // If no shape was clicked, provide visual feedback
+    if (!shapeClicked) {
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, 15, 0, Math.PI * 2);
+      this.ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+      this.ctx.fill();
+      this.ctx.restore();
+      
+      // Make the feedback disappear after a short time
+      setTimeout(() => this.redrawShapes(), 200);
     }
   }
   
@@ -262,6 +327,7 @@ class MovingShapes {
     
     // Check if correct
     const isCorrect = shape.typeIndex === expectedTypeIndex;
+    console.log(`Shape clicked: ${shape.typeIndex}, expected: ${expectedTypeIndex}, correct: ${isCorrect}`);
     
     // Check if sequence is complete
     if (isCorrect && this.playerSequence.length === this.activeSequence.length) {
@@ -323,6 +389,19 @@ class MovingShapes {
     
     console.log("Playing sequence:", this.activeSequence);
     
+    // FIXED: Display a "Watch the sequence!" message
+    const watchMessage = document.createElement('div');
+    watchMessage.textContent = 'Watch the sequence!';
+    watchMessage.style.position = 'absolute';
+    watchMessage.style.top = '20px';
+    watchMessage.style.left = '50%';
+    watchMessage.style.transform = 'translateX(-50%)';
+    watchMessage.style.fontSize = '24px';
+    watchMessage.style.color = '#fff';
+    watchMessage.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
+    watchMessage.style.zIndex = '100';
+    this.container.appendChild(watchMessage);
+    
     // Play sequence with delay between each shape
     const playNextInSequence = () => {
       if (this.currentPlayIndex < this.activeSequence.length) {
@@ -351,6 +430,17 @@ class MovingShapes {
         this.isPlayingSequence = false;
         this.canPlayerInteract = true;
         
+        // Change message to "Your turn!"
+        watchMessage.textContent = 'Your turn!';
+        watchMessage.style.color = '#4CAF50';
+        
+        // Remove message after a few seconds
+        setTimeout(() => {
+          if (watchMessage.parentNode) {
+            watchMessage.parentNode.removeChild(watchMessage);
+          }
+        }, 2000);
+        
         if (this.onSequencePlay) {
           this.onSequencePlay({
             sequence: [...this.activeSequence],
@@ -361,12 +451,22 @@ class MovingShapes {
     };
     
     // Start playing sequence after a short delay
-    setTimeout(playNextInSequence, 500);
+    setTimeout(playNextInSequence, 1000);
   }
   
   activateShape(shape) {
     // Visual feedback
     shape.active = true;
+    
+    // FIXED: Add temporary freezing of shape movement when activated
+    const originalSpeedX = shape.speedX;
+    const originalSpeedY = shape.speedY;
+    const originalRotationSpeed = shape.rotationSpeed;
+    
+    // Freeze movement while active
+    shape.speedX = 0;
+    shape.speedY = 0;
+    shape.rotationSpeed = 0;
     
     // Sound callback
     if (this.onShapeActivate) {
@@ -378,6 +478,11 @@ class MovingShapes {
     // Deactivate after a short time
     setTimeout(() => {
       shape.active = false;
+      
+      // Restore movement with slight variation
+      shape.speedX = originalSpeedX * (0.8 + Math.random() * 0.4);
+      shape.speedY = originalSpeedY * (0.8 + Math.random() * 0.4);
+      shape.rotationSpeed = originalRotationSpeed * (0.8 + Math.random() * 0.4);
     }, 500);
   }
   
@@ -388,11 +493,27 @@ class MovingShapes {
     this.isPlayingSequence = false;
     this.canPlayerInteract = false;
     
-    // Add some movement variation to shapes
-    for (const shape of this.shapes) {
+    // FIXED: Reset shapes to spaced-out positions
+    for (let i = 0; i < this.shapes.length; i++) {
+      const shape = this.shapes[i];
+      const typeIndex = shape.typeIndex;
+      
+      // Recalculate position to ensure shapes are well-spaced
+      const section = this.canvas.width / this.shapesData.length;
+      const x = (section * typeIndex) + (section - shape.size) * Math.random() * 0.7;
+      const y = Math.random() * (this.canvas.height - shape.size);
+      
+      // Update position
+      shape.x = x;
+      shape.y = y;
+      
+      // Add some movement variation to shapes
       shape.speedX = (Math.random() - 0.5) * this.randomRange(this.options.speed.min, this.options.speed.max) * 2;
       shape.speedY = (Math.random() - 0.5) * this.randomRange(this.options.speed.min, this.options.speed.max) * 2;
       shape.rotationSpeed = (Math.random() - 0.5) * 2;
+      
+      // Reset active state
+      shape.active = false;
     }
   }
 }
