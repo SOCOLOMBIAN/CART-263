@@ -1,21 +1,21 @@
 class particleBackground {
     constructor(selector, options = {}) {
-      // Set default options
+      // default options
       this.options = {
         particleCount: options.particleCount || 100,
         particleColor: options.particleColor || '#ffffff',
         starSize: options.starSize || 2,
         twinkle: options.twinkle !== undefined ? options.twinkle : true,
         speed: options.speed || 0.1,
-        minOpacity: options.minOpacity || 0.1,
-        maxOpacity: options.maxOpacity || 0.7
+        minOpacity: options.minOpacity || 0.2,
+        maxOpacity: options.maxOpacity || 0.9
       };
       
       // Create canvas element
       this.canvas = document.createElement('canvas');
       this.ctx = this.canvas.getContext('2d');
       
-      // Apply styles to make it a background
+      //  styles to make it a background
       this.canvas.style.position = 'fixed';
       this.canvas.style.top = '0';
       this.canvas.style.left = '0';
@@ -36,7 +36,7 @@ class particleBackground {
       // Start animation
       this.animate();
       
-      // Handle window resize
+      //window resize
       window.addEventListener('resize', () => this.resizeCanvas());
     }
     
@@ -74,7 +74,8 @@ class particleBackground {
         
         // Draw particle
         this.ctx.beginPath();
-        this.ctx.fillStyle = `rgba(${this.hexToRgb(this.options.particleColor)}, ${p.opacity})`;
+        this.ctx.fillStyle = `rgba(255,255,255, ${p.opacity})`;
+        this.ctx.beginPath();
         this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         this.ctx.fill();
         
@@ -105,22 +106,4 @@ class particleBackground {
       
       requestAnimationFrame(() => this.animate());
     }
-    
-    // Helper method to convert hex to rgb
-    hexToRgb(hex) {
-      // Remove # if present
-      hex = hex.replace('#', '');
-      
-      // Convert 3-digit hex to 6-digit
-      if (hex.length === 3) {
-        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-      }
-      
-      // Parse the hex values
-      const r = parseInt(hex.substring(0, 2), 16);
-      const g = parseInt(hex.substring(2, 4), 16);
-      const b = parseInt(hex.substring(4, 6), 16);
-      
-      return `${r}, ${g}, ${b}`;
-    }
-  }
+}
