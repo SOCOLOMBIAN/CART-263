@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Set up container for moving shapes
   shapesContainer.style.position = 'relative';
-  shapesContainer.style.height = '300px';
+  shapesContainer.style.height = '400px';
   
   // Shape SVGs
   const shapeSvgs = [raro, prisma, estrella, circle];
@@ -256,36 +256,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // // Show level up effect
-  // function showLevelUpEffect() {
-  //   // Create a level up text effect
-  //   const levelUpText = document.createElement('div');
-  //   levelUpText.textContent = 'LEVEL UP!';
-  //   levelUpText.style.position = 'absolute';
-  //   levelUpText.style.top = '50%';
-  //   levelUpText.style.left = '50%';
-  //   levelUpText.style.transform = 'translate(-50%, -50%)';
-  //   levelUpText.style.fontSize = '36px';
-  //   levelUpText.style.color = '#4CAF50';
-  //   levelUpText.style.fontWeight = 'bold';
-  //   levelUpText.style.textShadow = '0 0 10px rgba(76, 175, 80, 0.8)';
-  //   levelUpText.style.opacity = '0';
-  //   levelUpText.style.transition = 'opacity 0.5s, transform 1s';
+  // Show level up effect
+  function showLevelUpEffect() {
+    // Create a level up text effect
+    const levelUpText = document.createElement('div');
+    levelUpText.textContent = 'LEVEL UP!';
+    levelUpText.style.position = 'absolute';
+    levelUpText.style.top = '50%';
+    levelUpText.style.left = '50%';
+    levelUpText.style.transform = 'translate(-50%, -50%)';
+    levelUpText.style.fontSize = '36px';
+    levelUpText.style.color = '#4CAF50';
+    levelUpText.style.fontWeight = 'bold';
+    levelUpText.style.textShadow = '0 0 10px rgba(76, 175, 80, 0.8)';
+    levelUpText.style.opacity = '0';
+    levelUpText.style.transition = 'opacity 0.5s, transform 1s';
     
-  //   screens.game.appendChild(levelUpText);
+    screens.game.appendChild(levelUpText);
     
-  //   // Show animation
-  //   setTimeout(() => {
-  //     levelUpText.style.opacity = '1';
-  //     levelUpText.style.transform = 'translate(-50%, -70%) scale(1.5)';
-  //   }, 100);
+    // Show animation
+    setTimeout(() => {
+      levelUpText.style.opacity = '1';
+      levelUpText.style.transform = 'translate(-50%, -70%) scale(1.5)';
+    }, 100);
     
-  //   // Remove after animation
-  //   setTimeout(() => {
-  //     levelUpText.style.opacity = '0';
-  //     setTimeout(() => levelUpText.remove(), 500);
-  //   }, 1500);
-  // }
+    // Remove after animation
+    setTimeout(() => {
+      levelUpText.style.opacity = '0';
+      setTimeout(() => levelUpText.remove(), 500);
+    }, 1500);
+  }
 
   // Resume audio context on user interaction
   window.addEventListener('click', () => {
