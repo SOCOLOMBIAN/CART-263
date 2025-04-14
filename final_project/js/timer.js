@@ -13,8 +13,55 @@ class GameTimer {
             console.error( 'timer not working');
             return;
         }
-   
+      }
 
+    start(duration,onComplete) {
+        this.callBack= onComplete;
+
+        //inital time
+        this.timeLeft= Math.max(1, Math.floor(duration));
+        this.update();
+        this.show();
+
+        this.interval= setInterval(() => {
+            this.timeLeft--;
+            this.update();
+
+            if (this.timeLeft <=0) {
+                this.stop();
+
+                if (this.callBack && typeof this.callBack === 'function') {
+
+                }
+            }
+        }, 1000);
+
+        return this;
     }
+    
+    //get the timer 
+    update() {
+        const timerValue= document.getElementById('timer-value');
+        if (timerValue) {
+            timerValue.textContent= this.timeLeft;
 
-}
+            if (this.timeLeft <= 3) {
+              this.element.classList.add ('warning');
+            } else{
+              this.element.classList.remove('warning');
+                 
+             }
+            }
+            return this;
+        }
+
+        reset() {
+            this.stop();
+            this.timeLeft=0;
+            this.hide();
+
+            return this;
+        }
+
+        
+    }
