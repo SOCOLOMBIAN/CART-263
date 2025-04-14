@@ -54,7 +54,8 @@ class GameTimer {
             }
             return this;
         }
-
+       
+        // reset the timer 
         reset() {
             this.stop();
             this.timeLeft=0;
@@ -62,6 +63,25 @@ class GameTimer {
 
             return this;
         }
-
         
+        show() {
+            if (this.element){
+                this.element.computedStyleMap.opacity= '1';
+            }
+            return this;
+        }
+
+        hide(){
+            if (this.element){
+                this.element.style.opacity= '0';
+            }
+            return this;
+        }
+        
+        static calculateDuration(level){
+            return Math.max(10-((level -1)*0.5), 3);
+        }
     }
+
+    // create the global instance 
+window.gameTimer= new GameTimer();
