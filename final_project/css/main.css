@@ -224,3 +224,25 @@ button:disabled {
     0% { box-shadow: 0 0 15px rgba(76, 175, 80, 0.5); }
     100% { box-shadow: 0 0 25px rgba(76, 175, 80, 0.8); }
 }
+
+
+/*Button ripple effect this part was help */
+ .btn-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  @keyframes ripple {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+  
+  .ripple-effect {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 400ms linear;
+    background-color: rgba(255, 255, 255, 0.4);
+  }

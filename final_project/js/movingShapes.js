@@ -1,17 +1,18 @@
 class MovingShapes {
-  constructor(container, shapesData, options = {}) {
+  constructor(container, shapesData, gameState, options = {}) {
     this.container = typeof container === 'string' ? document.querySelector(container) : container;
     this.shapesData = shapesData; // Array of SVG strings
-    this.options = {
+    this.gameState = gameState; //acces to the state of the game
+    this.options = { //options for the shapes
       count: options.count || 1,
-      speed: options.speed || { min: 0.5, max: 1.2 },
+      speed: options.speed || { min: 0.5, max: 1.5 },
       size: options.size || { min: 70, max: 90 },
-      activeColor: options.activeColor || '#4CAF50',
+      activeColor: options.activeColor || this.getRandomColor(),
       inactiveColor: options.inactiveColor || '#ffffff',
-      clickableRadius: options.clickableRadius || 50,
+      clickableRadius: options.clickableRadius || 55,
       ...options
     };
-    
+
     // Create canvas
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d');
@@ -20,10 +21,6 @@ class MovingShapes {
     
     // Moving shapes collection and game state
     this.shapes = [];
-    this.activeSequence = [];
-    this.playerSequence = [];
-    this.isPlayingSequence = false;
-    this.canPlayerInteract = false;
     this.currentPlayIndex = 0;
     
     // Initialize shapes and load SVG images
@@ -48,28 +45,18 @@ class MovingShapes {
       const url = URL.createObjectURL(svgBlob);
       const img = new Image();
       
-      const loadPromise = new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-      });
-      
-      loadPromises.push(loadPromise);
-      img.src = url;
+  /**
+   * this part was made wiith the help of AI const load promise, to make sure
+   * the svg load proper
+   */
+    img.onload = () =>{
+      this.f=this.drawShape();
+    };
+
+    img.src = url;
       this.svgImages.push({ image: img, url });
     }
-    
-    // Wait for all images to load
-    Promise.all(loadPromises)
-      .then(() => this.redrawShapes())
-      .catch(error => console.error("Error loading SVG images:", error));
   }
-  
-  redrawShapes() {
-    if (!this.ctx) return;
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.shapes.forEach(shape => this.drawShape(shape));
-  }
-  
   resizeCanvas() {
     const rect = this.container.getBoundingClientRect();
     this.canvas.width = rect.width;
@@ -432,5 +419,9 @@ class MovingShapes {
       // Reset active state
       shape.active = false;
     }
+  }
+
+  getRandomColor() {
+    return `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
   }
 }
