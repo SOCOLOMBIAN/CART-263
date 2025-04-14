@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // control the difficulty of the levels
   const difficultyManager = {
-    settings: {
+    baseSettings: {
       speed: {min: 0.5, max: 1.2},
       sequenceDelay: 1000,
       shapeDuration:500
@@ -184,13 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const successMessage = displays.message;
   const errorMessage = displays.messageWrong;
 
-  //create timer 
-  gameTimer.create();
-
   // Get the shapes container
   const shapesContainer = document.querySelector('.shapes-container');
   const shapeSvgs = [raro, prisma, estrella, circle];
-  console.log("Shape SVGs loaded:", { raro, prisma, estrella, circle });
   
   // Initialize moving shapes with improved settings for better visibility
   const movingShapes = new MovingShapes(shapesContainer, shapeSvgs, {
@@ -199,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     size: { min: 50, max: 70 } 
   });
   
+  //shape callbacks
   movingShapes.onShapeActivate = (data) => {
     if (!audioInitialized) initializeAudio();
     
@@ -221,48 +218,68 @@ document.addEventListener('DOMContentLoaded', () => {
       buttons.play.disabled = false;
       movingShapes.canPlayerInteract = true;
 
-  
-  
-      // Flash green for success
-      AnimationEffects.flashBackground(document.body, 'rgba(0, 255, 0, 0.2)', 500);
-      
-      // Add level-up animation
-      showLevelUpEffect();
+            // Start timer
+            const timerDuration = gameTimer.calculateDuration(gameState.level);
+            gameTimer.start(timerDuration, () => {
+              movingShapes.onSequenceError({ error: "Time's up!" });
+            });
+          }
+        };
 
-      // Level up after a delay - FIXED: Added proper sequence reset
-      setTimeout(() => {
-        const newState = gameState.levelUp();
-        updateDisplay(newState.score, newState.level);
-        
-        // Generate next sequence and ensure game state is reset properly
-        gameState.generateNextSequence();
-        gameState.isPlaying = false;  // Ensure isPlaying is reset
-        gameState.canPlayerInteract = false;  // Ensure player interaction state is correct
-        
-        // Ensure button is enabled
-        buttons.play.disabled = false;
-        
-        // Reset moving shapes and ensure they're in the right state
-        movingShapes.reset();
-        movingShapes.isPlayingSequence = false;
-        movingShapes.canPlayerInteract = false;
-        
-        console.log("Ready for next level sequence:", gameState.gameSequence);
-      }, 1500);
-    }
-  };
-  
-  movingShapes.onSequenceError = (data) => {
+  // the user completes the sequence
+  movingShapes.onSequenceComplete = (data) => {
+      if (data.success) {
+        // Stop timer
+         gameTimer.stop().hide();
+      
+       // Update score and level
+       gameState.score += gameState.level * 10;
+       updateDisplay(gameState.score, gameState.level);
+       showMessage(successMessage);
+       
+       // Visual feedback
+       AnimationEffects.flashBackground(document.body, 'rgba(0, 255, 0, 0.2)', 500);
+ 
+       // Level up after delay
+       setTimeout(() => {
+       const newState = gameState.levelUp();
+       updateDisplay(newState.score, newState.level);
+         
+         // Apply difficulty scaling
+         const difficultySettings = difficultyManager.applyScaling(
+           gameState.level, 
+           movingShapes.shapes
+         );
+         
+         // Reset game state for next level
+         gameState.generateNextSequence();
+         gameState.isPlaying = false;
+         gameState.canPlayerInteract = false;
+         
+         // Reset state
+         buttons.play.disabled = false;
+         movingShapes.reset();
+         movingShapes.isPlayingSequence = false;
+         movingShapes.canPlayerInteract = false;
+       }, 1500);
+     }
+   };
+
+  // error of the user in the sequence 
+   movingShapes.onSequenceError = (data) => {
+    // Stop timer
+    gameTimer.stop().hide();
+    
     showMessage(errorMessage);
     
-    // Shake the screen and flash red
+    // Visual feedback
     AnimationEffects.screenShake(screens.game, 10, 500);
     AnimationEffects.flashBackground(document.body, 'rgba(255, 0, 0, 0.2)', 500);
     
     setTimeout(endGame, 1000);
   };
 
-  // Add visual effects to buttons
+  // Add button event listeners
   buttons.start.addEventListener('click', (e) => {
     AnimationEffects.createRipple(e, 'rgba(76, 175, 80, 0.5)');
     startGame();
@@ -278,167 +295,85 @@ document.addEventListener('DOMContentLoaded', () => {
     playSequence();
   });
 
-  function startGame() {
-    // Hide intro, show game
-    screens.intro.classList.remove('active');
-    screens.game.classList.add('active');
-    
-    // Reset game state
-    const state = gameState.resetGame();
-    updateDisplay(state.score, state.level);
-    
-    // Generate initial sequence
+//game state functions 
+
+function startGame() {
+  screens.intro.classList.remove('active');
+  screens.game.classList.add('active');
+  
+  const state = gameState.resetGame();
+  updateDisplay(state.score, state.level);
+  
+  gameState.generateNextSequence();
+  buttons.play.disabled = false;
+  movingShapes.reset();
+}
+
+function restartGame() {
+  screens.gameOver.classList.remove('active');
+  screens.game.classList.add('active');
+  
+  const state = gameState.resetGame();
+  updateDisplay(state.score, state.level);
+  
+  gameState.generateNextSequence();
+  buttons.play.disabled = false;
+  movingShapes.reset();
+}
+
+function updateDisplay(score, level) {
+  displays.score.textContent = score;
+  displays.level.textContent = level;
+  displays.finalScore.textContent = score;
+}
+
+function playSequence() {
+  // Prevent multiple plays
+  if (gameState.isPlaying || movingShapes.isPlayingSequence) return;
+  
+  const sequence = gameState.startPlayingSequence();
+  buttons.play.disabled = true;
+  
+  // Ensure valid sequence
+  if (!sequence || sequence.length === 0) {
     gameState.generateNextSequence();
+    const newSequence = gameState.startPlayingSequence();
     
-    // Enable play button
-    buttons.play.disabled = false;
-    
-    // Reset moving shapes
-    movingShapes.reset();
-    
-    console.log("Game started!");
-  }
-
-  function restartGame() {
-    // Hide game over, show game
-    screens.gameOver.classList.remove('active');
-    screens.game.classList.add('active');
-    
-    // Reset game state
-    const state = gameState.resetGame();
-    updateDisplay(state.score, state.level);
-    
-    // Generate initial sequence
-    gameState.generateNextSequence();
-    
-    // Enable play button
-    buttons.play.disabled = false;
-    
-    // Reset moving shapes
-    movingShapes.reset();
-    
-    console.log("Game restarted!");
-  }
-
-  // Update the screen displays
-  function updateDisplay(score, level) {
-    displays.score.textContent = score;
-    displays.level.textContent = level;
-    displays.finalScore.textContent = score;
-  }
-
-  function playSequence() {
-    console.log("Play button clicked");
-    console.log("Current game state:", { 
-      isPlaying: gameState.isPlaying, 
-      sequence: gameState.gameSequence,
-      movingShapesPlaying: movingShapes.isPlayingSequence
-    });
-    
-    // Prevent multiple plays
-    if (gameState.isPlaying || movingShapes.isPlayingSequence) {
-      console.log("Already playing sequence - ignoring click");
+    if (!newSequence || newSequence.length === 0) {
+      buttons.play.disabled = false;
       return;
     }
-    
-    console.log("Playing sequence");
-    
-    const sequence = gameState.startPlayingSequence();
-    buttons.play.disabled = true;
-    
-    // Check if sequence exists and has length
-    if (!sequence || sequence.length === 0) {
-      console.error("Sequence is empty or undefined!");
-      // Regenerate sequence if empty
-      gameState.generateNextSequence();
-      const newSequence = gameState.startPlayingSequence();
-      
-      if (!newSequence || newSequence.length === 0) {
-        console.error("Failed to generate new sequence");
-        buttons.play.disabled = false;
-        return;
-      } else {
-        console.log("Generated new sequence:", newSequence);
-        // Use the moving shapes to play the sequence
-        movingShapes.playSequence(newSequence);
-      }
-    } else {
-      console.log("Using existing sequence:", sequence);
-      // Use the moving shapes to play the sequence
-      movingShapes.playSequence(sequence);
-    }
-  }
 
-  function showMessage(element) {
-    element.classList.add('visible');
-    setTimeout(() => {
-      element.classList.remove('visible');
-    }, 1000);
+    const settings = difficultyManager.applyScaling(gameState.level);
+    movingShapes.playSequence(newSequence, settings);
+  } else {
+    const settings = difficultyManager.applyScaling(gameState.level);
+    movingShapes.playSequence(sequence, settings);
   }
+}
 
-  function endGame() {
-    console.log("Game over!");
-    
-    screens.game.classList.remove('active');
-    screens.gameOver.classList.add('active');
-    
-    // Clear old gallery items
-    displays.gallery.innerHTML = '';
-    
-    // Add a simple game over message
-    const gameOverMsg = document.createElement('div');
-    gameOverMsg.innerHTML = `<p>Thanks for playing! You reached level ${gameState.level}!</p>
-                           <p>Your final score: ${gameState.score}</p>`;
-    displays.gallery.appendChild(gameOverMsg);
-  }
+function showMessage(element) {
+  element.classList.add('visible');
+  setTimeout(() => element.classList.remove('visible'), 1000);
+}
 
-  // Show level up effect
-  function showLevelUpEffect() {
-    // Create a level up text effect
-    const levelUpText = document.createElement('div');
-    levelUpText.textContent = 'LEVEL UP!';
-    levelUpText.style.position = 'absolute';
-    levelUpText.style.top = '50%';
-    levelUpText.style.left = '50%';
-    levelUpText.style.transform = 'translate(-50%, -50%)';
-    levelUpText.style.fontSize = '48px'; // Increased size
-    levelUpText.style.color = '#4CAF50';
-    levelUpText.style.fontWeight = 'bold';
-    levelUpText.style.textShadow = '0 0 15px rgba(76, 175, 80, 0.8)';
-    levelUpText.style.opacity = '0';
-    levelUpText.style.transition = 'opacity 0.5s, transform 1s';
-    levelUpText.style.zIndex = '100'; // Make sure it appears on top
-    
-    screens.game.appendChild(levelUpText);
-    
-    // Show animation
-    setTimeout(() => {
-      levelUpText.style.opacity = '1';
-      levelUpText.style.transform = 'translate(-50%, -70%) scale(1.5)';
-    }, 100);
-    
-    // Remove after animation
-    setTimeout(() => {
-      levelUpText.style.opacity = '0';
-      setTimeout(() => levelUpText.remove(), 500);
-    }, 1500);
-  }
+function endGame() {
+  screens.game.classList.remove('active');
+  screens.gameOver.classList.add('active');
+  displays.finalScore.textContent=gameState.score;
+}
 
-  // Initialize audio on first click anywhere in the document
+
+//audio initliazion on user interaction 
   document.addEventListener('click', () => {
-    initializeAudio();
-    
-    // Try to resume audio context if it's suspended
+    initializeAudio();  
     if (audioCtx.state === 'suspended') {
       try {
-        audioCtx.resume().then(() => {
-          console.log("AudioContext resumed successfully");
-        });
+        audioCtx.resume().catch(e => console.error("Error resuming AudioContext:", e));
       } catch (e) {
         console.error("Error resuming AudioContext:", e);
       }
     }
   }, {once: true});
-  
-  console.log("Game initialized and ready!");
 });
+

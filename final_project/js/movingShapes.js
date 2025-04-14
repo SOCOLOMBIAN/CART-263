@@ -3,12 +3,12 @@ class MovingShapes {
     this.container = typeof container === 'string' ? document.querySelector(container) : container;
     this.shapesData = shapesData; // Array of SVG strings
     this.options = {
-      count: options.count || 1, // Number of each shape type (simplified)
+      count: options.count || 1,
       speed: options.speed || { min: 0.5, max: 1.2 },
-      size: options.size || { min: 70, max: 90 }, // Larger shapes for better interaction
-      activeColor: options.activeColor || '#4CAF50', // Green highlight when active
-      inactiveColor: options.inactiveColor || '#ffffff', // Normal color
-      clickableRadius: options.clickableRadius || 50, // Increased for easier clicking
+      size: options.size || { min: 70, max: 90 },
+      activeColor: options.activeColor || '#4CAF50',
+      inactiveColor: options.inactiveColor || '#ffffff',
+      clickableRadius: options.clickableRadius || 50,
       ...options
     };
     
@@ -18,20 +18,16 @@ class MovingShapes {
     this.container.appendChild(this.canvas);
     this.resizeCanvas();
     
-    // Moving shapes collection
+    // Moving shapes collection and game state
     this.shapes = [];
-    
-    // Sequence and player interaction
     this.activeSequence = [];
     this.playerSequence = [];
     this.isPlayingSequence = false;
     this.canPlayerInteract = false;
     this.currentPlayIndex = 0;
     
-    // Initialize shapes
+    // Initialize shapes and load SVG images
     this.initShapes();
-    
-    // Preload SVG images
     this.preloadSVGImages();
     
     // Event listeners
@@ -43,117 +39,75 @@ class MovingShapes {
   }
   
   preloadSVGImages() {
-    // Create SVG images for each shape type
     this.svgImages = [];
-    
     const loadPromises = [];
     
     for (let i = 0; i < this.shapesData.length; i++) {
       const svgString = this.shapesData[i];
-      // Convert SVG string to data URL
       const svgBlob = new Blob([svgString], {type: 'image/svg+xml'});
       const url = URL.createObjectURL(svgBlob);
       const img = new Image();
       
-      // Create a promise for each image load
       const loadPromise = new Promise((resolve, reject) => {
-        img.onload = () => {
-          console.log(`SVG image ${i} loaded successfully`);
-          resolve();
-        };
-        
-        img.onerror = (e) => {
-          console.error(`Error loading SVG image ${i}:`, e);
-          reject(e);
-        };
+        img.onload = resolve;
+        img.onerror = reject;
       });
       
       loadPromises.push(loadPromise);
       img.src = url;
-      
-      this.svgImages.push({
-        image: img,
-        url: url
-      });
+      this.svgImages.push({ image: img, url });
     }
     
     // Wait for all images to load
     Promise.all(loadPromises)
-      .then(() => {
-        console.log(`All ${this.svgImages.length} SVG images loaded successfully`);
-        // Redraw to ensure shapes are visible
-        this.redrawShapes();
-      })
-      .catch(error => {
-        console.error("Error loading SVG images:", error);
-      });
+      .then(() => this.redrawShapes())
+      .catch(error => console.error("Error loading SVG images:", error));
   }
   
-  // Add a new method to force redraw of all shapes
   redrawShapes() {
     if (!this.ctx) return;
-    
-    // Clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
-    // Draw all shapes
-    for (const shape of this.shapes) {
-      this.drawShape(shape);
-    }
+    this.shapes.forEach(shape => this.drawShape(shape));
   }
   
   resizeCanvas() {
-    // Get container dimensions and make canvas full size
     const rect = this.container.getBoundingClientRect();
     this.canvas.width = rect.width;
     this.canvas.height = rect.height;
     
-    // Adjust canvas styling
     this.canvas.style.position = 'absolute';
     this.canvas.style.top = '0';
     this.canvas.style.left = '0';
     this.canvas.style.width = '100%';
     this.canvas.style.height = '100%';
-    
-    // Make sure there's no overflow hidden constraint
     this.container.style.overflow = 'visible';
   }
   
   initShapes() {
     this.shapes = [];
     
-    // Create multiple instances of each shape type
     for (let typeIndex = 0; typeIndex < this.shapesData.length; typeIndex++) {
       for (let i = 0; i < this.options.count; i++) {
-        // Random position, size, and speed
         const size = this.randomRange(this.options.size.min, this.options.size.max);
-        
-        // Set initial positions to be well-spaced
-        // Calculate position based on the number of the shape type
-        // This ensures all shapes are visible and not on top of each other
         const section = this.canvas.width / this.shapesData.length;
         const x = (section * typeIndex) + (section - size) * Math.random() * 0.7;
         const y = Math.random() * (this.canvas.height - size);
         
         const shape = {
           id: `shape-${typeIndex}-${i}`,
-          typeIndex: typeIndex, // Type of shape (0, 1, 2, 3)
-          x: x,
-          y: y,
-          size: size,
+          typeIndex,
+          x, y, size,
           speedX: (Math.random() - 0.5) * this.randomRange(this.options.speed.min, this.options.speed.max) * 2,
           speedY: (Math.random() - 0.5) * this.randomRange(this.options.speed.min, this.options.speed.max) * 2,
           rotation: Math.random() * 360,
           rotationSpeed: (Math.random() - 0.5) * 2,
           active: false,
-          opacity: 0.8 + Math.random() * 0.2 // Increased base opacity for better visibility
+          opacity: 0.8 + Math.random() * 0.2
         };
         
         this.shapes.push(shape);
       }
     }
-    
-    console.log(`Created ${this.shapes.length} shapes`);
   }
   
   randomRange(min, max) {
@@ -161,7 +115,6 @@ class MovingShapes {
   }
   
   animate() {
-    // Clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
     // Update and draw shapes
@@ -171,7 +124,7 @@ class MovingShapes {
       shape.y += shape.speedY;
       shape.rotation += shape.rotationSpeed;
       
-      // Bounce off edges - with slight offset to avoid getting stuck
+      // Bounce off edges
       if (shape.x < 0) {
         shape.speedX = Math.abs(shape.speedX);
         shape.x = 1;
@@ -201,7 +154,6 @@ class MovingShapes {
       this.ctx.restore();
     }
     
-    // Continue animation
     requestAnimationFrame(() => this.animate());
   }
   
@@ -219,7 +171,6 @@ class MovingShapes {
       this.ctx.shadowColor = this.options.activeColor;
       this.ctx.shadowBlur = 15;
       
-      // Draw glow effect
       this.ctx.beginPath();
       this.ctx.arc(0, 0, shape.size/1.5, 0, Math.PI * 2);
       this.ctx.fillStyle = `rgba(76, 175, 80, 0.3)`;
@@ -231,10 +182,7 @@ class MovingShapes {
       const svgImg = this.svgImages[shape.typeIndex];
       
       if (svgImg && svgImg.image && svgImg.image.complete) {
-        // Apply opacity
         this.ctx.globalAlpha = shape.active ? 1.0 : shape.opacity;
-        
-        // Draw the image
         this.ctx.drawImage(
           svgImg.image,
           -shape.size/2, -shape.size/2,
@@ -243,7 +191,7 @@ class MovingShapes {
       }
     }
     
-    // Draw a subtle border around the shapes to make them more visible
+    // Draw a subtle border around the shapes
     if (!shape.active) {
       this.ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
       this.ctx.lineWidth = 2;
@@ -256,16 +204,12 @@ class MovingShapes {
   }
   
   handleClick(event) {
-    // FIXED: Add debugging to check player interaction state
-    console.log("Shape clicked, canPlayerInteract:", this.canPlayerInteract);
-    
     if (!this.canPlayerInteract) {
-      // FIXED: Add visual feedback when player clicks but interaction is disabled
+      // Visual feedback when clicking is not allowed
       const rect = this.canvas.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
       
-      // Show a small visual feedback that clicking is not allowed yet
       this.ctx.save();
       this.ctx.beginPath();
       this.ctx.arc(x, y, 20, 0, Math.PI * 2);
@@ -273,7 +217,6 @@ class MovingShapes {
       this.ctx.fill();
       this.ctx.restore();
       
-      // Make the feedback disappear after a short time
       setTimeout(() => this.redrawShapes(), 300);
       return;
     }
@@ -289,19 +232,16 @@ class MovingShapes {
       const centerX = shape.x + shape.size/2;
       const centerY = shape.y + shape.size/2;
       const distance = Math.sqrt((x - centerX)**2 + (y - centerY)**2);
-      
-      // FIXED: Increased clickable radius for easier interaction
       const clickRadius = Math.max(this.options.clickableRadius, shape.size/2);
       
       if (distance <= clickRadius) {
-        console.log(`Shape clicked: type=${shape.typeIndex}`);
         this.handleShapeClick(shape);
         shapeClicked = true;
         break;
       }
     }
     
-    // If no shape was clicked, provide visual feedback
+    // Visual feedback for empty area click
     if (!shapeClicked) {
       this.ctx.save();
       this.ctx.beginPath();
@@ -310,7 +250,6 @@ class MovingShapes {
       this.ctx.fill();
       this.ctx.restore();
       
-      // Make the feedback disappear after a short time
       setTimeout(() => this.redrawShapes(), 200);
     }
   }
@@ -327,11 +266,9 @@ class MovingShapes {
     
     // Check if correct
     const isCorrect = shape.typeIndex === expectedTypeIndex;
-    console.log(`Shape clicked: ${shape.typeIndex}, expected: ${expectedTypeIndex}, correct: ${isCorrect}`);
     
-    // Check if sequence is complete
+    // Complete sequence or error
     if (isCorrect && this.playerSequence.length === this.activeSequence.length) {
-      // Complete sequence callback
       setTimeout(() => {
         if (this.onSequenceComplete) {
           this.onSequenceComplete({
@@ -343,9 +280,7 @@ class MovingShapes {
       
       this.canPlayerInteract = false;
     } 
-    // Check if incorrect
     else if (!isCorrect) {
-      // Error callback
       setTimeout(() => {
         if (this.onSequenceError) {
           this.onSequenceError({
@@ -361,12 +296,7 @@ class MovingShapes {
   }
   
   playSequence(sequence) {
-    console.log("MovingShapes.playSequence called with:", sequence);
-    
-    if (this.isPlayingSequence) {
-      console.log("Already playing sequence - ignoring request");
-      return;
-    }
+    if (this.isPlayingSequence) return;
     
     if (!sequence || sequence.length === 0) {
       console.error("Cannot play empty sequence");
@@ -387,9 +317,7 @@ class MovingShapes {
     this.canPlayerInteract = false;
     this.currentPlayIndex = 0;
     
-    console.log("Playing sequence:", this.activeSequence);
-    
-    // FIXED: Display a "Watch the sequence!" message
+    // Display message
     const watchMessage = document.createElement('div');
     watchMessage.textContent = 'Watch the sequence!';
     watchMessage.style.position = 'absolute';
@@ -406,22 +334,14 @@ class MovingShapes {
     const playNextInSequence = () => {
       if (this.currentPlayIndex < this.activeSequence.length) {
         const typeIndex = this.activeSequence[this.currentPlayIndex];
-        
-        // Find a shape of this type
         const shapesOfType = this.shapes.filter(s => s.typeIndex === typeIndex);
         
         if (shapesOfType.length > 0) {
           const randomShape = shapesOfType[Math.floor(Math.random() * shapesOfType.length)];
-          
-          // Activate the shape
           this.activateShape(randomShape);
-          
-          // Move to next in sequence
           this.currentPlayIndex++;
           setTimeout(playNextInSequence, 1000);
         } else {
-          console.error("No shapes of type", typeIndex, "found");
-          // Continue anyway
           this.currentPlayIndex++;
           setTimeout(playNextInSequence, 500);
         }
@@ -458,21 +378,18 @@ class MovingShapes {
     // Visual feedback
     shape.active = true;
     
-    // FIXED: Add temporary freezing of shape movement when activated
+    // Temporarily freeze shape movement
     const originalSpeedX = shape.speedX;
     const originalSpeedY = shape.speedY;
     const originalRotationSpeed = shape.rotationSpeed;
     
-    // Freeze movement while active
     shape.speedX = 0;
     shape.speedY = 0;
     shape.rotationSpeed = 0;
     
     // Sound callback
     if (this.onShapeActivate) {
-      this.onShapeActivate({
-        typeIndex: shape.typeIndex
-      });
+      this.onShapeActivate({ typeIndex: shape.typeIndex });
     }
     
     // Deactivate after a short time
@@ -493,12 +410,12 @@ class MovingShapes {
     this.isPlayingSequence = false;
     this.canPlayerInteract = false;
     
-    // FIXED: Reset shapes to spaced-out positions
+    // Reset shapes to spaced-out positions
     for (let i = 0; i < this.shapes.length; i++) {
       const shape = this.shapes[i];
       const typeIndex = shape.typeIndex;
       
-      // Recalculate position to ensure shapes are well-spaced
+      // Recalculate position
       const section = this.canvas.width / this.shapesData.length;
       const x = (section * typeIndex) + (section - shape.size) * Math.random() * 0.7;
       const y = Math.random() * (this.canvas.height - shape.size);
@@ -507,7 +424,7 @@ class MovingShapes {
       shape.x = x;
       shape.y = y;
       
-      // Add some movement variation to shapes
+      // Add some movement variation
       shape.speedX = (Math.random() - 0.5) * this.randomRange(this.options.speed.min, this.options.speed.max) * 2;
       shape.speedY = (Math.random() - 0.5) * this.randomRange(this.options.speed.min, this.options.speed.max) * 2;
       shape.rotationSpeed = (Math.random() - 0.5) * 2;
