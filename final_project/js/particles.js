@@ -1,3 +1,10 @@
+
+/**
+ * particles.js
+ * Creates an animated starry background effect.
+ * Manages particle creation, animation, and canvas resizing.
+ */
+
 class particleBackground {
     constructor(selector, options = {}) {
       // default options
@@ -16,13 +23,16 @@ class particleBackground {
       this.ctx = this.canvas.getContext('2d');
       
       //  styles to make it a background
-      this.canvas.style.position = 'fixed';
-      this.canvas.style.top = '0';
-      this.canvas.style.left = '0';
-      this.canvas.style.width = '100%';
-      this.canvas.style.height = '100%';
-      this.canvas.style.zIndex = '-1';
-      this.canvas.style.pointerEvents = 'none';
+      Object.assign(this.canvas.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        zIndex: '-1',
+        pointerEvents: 'none'
+      });
+      
       
       // Append to specified element or to body
       const container = document.querySelector(selector) || document.body;
@@ -63,6 +73,7 @@ class particleBackground {
         });
       }
     }
+    
     
     animate() {
       // Clear canvas

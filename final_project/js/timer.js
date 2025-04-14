@@ -1,3 +1,9 @@
+/**
+ * timer.js
+ * Provides countdown timer functionality for the game.
+ * Manages visual display and callback execution when time runs out.
+ */
+
 class GameTimer {
     constructor() {
       this.element = null;
@@ -5,7 +11,10 @@ class GameTimer {
       this.timeLeft = 0;
       this.callback = null;
     }
-  
+
+   /**
+    *Find and store the timer element in the DOM
+     */
     create() {
       this.element = document.querySelector('.timer-display');
       if (!this.element) {
@@ -13,6 +22,9 @@ class GameTimer {
       }
     }
   
+   /**
+     * countdown timer 
+     */
     start(duration, onComplete) {
       this.reset();
       this.callback = onComplete;
@@ -35,6 +47,9 @@ class GameTimer {
       return this;
     }
     
+     /**
+     * update timer display
+     */
     update() {
       const timerValue = document.getElementById('timer-value');
       if (timerValue) {
@@ -52,6 +67,9 @@ class GameTimer {
       return this;
     }
     
+     /**
+     * stop,rest,show and hide the timer
+     */
     stop() {
       if (this.interval) {
         clearInterval(this.interval);

@@ -1,3 +1,9 @@
+/**
+ * animation.js
+ * Provides visual animation effects for the game.
+ * Collection of static methods for screen shake, flashes, and other visual feedback.
+ */
+
 class AnimationEffects {
   // Create a screen shake effect
   static screenShake(element, intensity = 5, duration = 500) {

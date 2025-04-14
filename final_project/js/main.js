@@ -1,3 +1,10 @@
+/**
+ * main.js
+ * Main entry point for the chromatic sound sequences game
+ * coordinates game flow,user interaction, and the integration of all components 
+ */
+
+
 document.addEventListener('DOMContentLoaded', () => { 
   
   // Initialize the particle background

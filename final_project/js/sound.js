@@ -1,3 +1,11 @@
+
+/**
+ * Sound.js
+ * Handles audio generation for the game using the Web Audio API.
+ * Creates tones with different waveforms and frequencies for game feedback.
+ * This was build with the help of the instructor 
+ */
+
 class SoundObject {
   constructor(audioCtx, frequency, type, duration) {
       try {
@@ -19,7 +27,7 @@ class SoundObject {
           this.oscillator.start();
           
           // Set initial gain (volume) and fade out
-          this.gainNode.gain.setValueAtTime(0.7, audioCtx.currentTime); // Lower initial volume to prevent clipping
+          this.gainNode.gain.setValueAtTime(0.7, audioCtx.currentTime); // Lower initial volume 
           this.gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
           // Stop the oscillator after duration

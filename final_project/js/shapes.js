@@ -1,3 +1,10 @@
+
+/**
+ * shapes.js
+ * Defines SVG shapes used in the game.
+ * Each constant contains an SVG string for a different game shape.
+ */
+
 const raro=`
 <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 392.18 374.18">
     <defs>

@@ -1,17 +1,27 @@
-// GameState class - manages the game state
+/**
+ * state.js
+ * Manages the game state, including score, level, sequences and sound mapping.
+ * Handles game progression logic and sequence validation.
+ */
+
 class GameState {
   constructor() {
     this.gameSequence = [];
     this.playerSequence = [];
     this.score = 0;
     this.level = 1;
+
     // game state
     this.isPlaying = false;
     this.canPlayerInteract = false;
+
     // audio configuration
     this.soundMap = this.generateRandomSoundMap();
   }
-
+  
+  /**
+ *reset game to inital state
+ */
   resetGame() {
     this.gameSequence = [];
     this.playerSequence = [];
@@ -28,33 +38,37 @@ class GameState {
     };
   }
 
+/**
+ array of sounds 
+ */
   generateRandomSoundMap() {
-    // Create distinctive sounds for each shape type
     return [
       {
-        frequency: 261.63, // C4
+        frequency: 261.63, 
         type: 'sine',
         duration: 0.4
       },
       {
-        frequency: 329.63, // E4
+        frequency: 329.63, 
         type: 'triangle',
         duration: 0.4
       },
       {
-        frequency: 392.00, // G4
+        frequency: 392.00, 
         type: 'square',
         duration: 0.4
       },
       {
-        frequency: 523.25, // C5
+        frequency: 523.25,
         type: 'sawtooth',
         duration: 0.4
       }
     ];
   }
 
-  // Generate next sequence based on level
+/**
+ generate the next sequence base on the current level 
+ */
   generateNextSequence() {
     if (this.level === 1) {
       // Reset sequence for level 1
@@ -74,7 +88,9 @@ class GameState {
     return [...this.gameSequence];
   }
 
-  // Start playing the sequence 
+ /**
+ start playing the sequence
+ */
   startPlayingSequence() {
     this.isPlaying = true;
     this.canPlayerInteract = false;
@@ -83,13 +99,18 @@ class GameState {
     return [...this.gameSequence];
   }
 
-  // User finished playing the sequence 
+ /**
+ User finished playing the sequence 
+ */
   finishPlayingSequence() {
     this.isPlaying = false;
     this.canPlayerInteract = true;
     console.log("Finished playing sequence, ready for player input");
   }
 
+/**
+ index of what the user clicked and move is correct
+ */
   addPlayerMove(shapeIndex) {
     if (!this.canPlayerInteract) return { correct: false };
 
@@ -107,7 +128,7 @@ class GameState {
     // Check if the sequence is complete
     if (this.playerSequence.length === this.gameSequence.length) {
       // Calculate score based on level (higher levels = more points)
-      this.score += this.level * 10;
+      this.score += this.level * 3; // score corresponding to a good answer
       this.canPlayerInteract = false;
       console.log("Sequence complete! Score:", this.score);
       return {
