@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => { 
+  
   // Initialize the particle background
   const starBackground = new particleBackground('body', {
       particleCount: 100,
@@ -17,14 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     try {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      console.log("Audio context created successfully");
       audioInitialized = true;
-      
-      // Create a silent sound to "warm up" the audio context
-      const silent = new SoundObject(audioCtx, 0, 'sine', 0.1);
+  
+
+      new SoundObject(audioCtx, 0, 'sine', 0.1);
     } catch (e) {
-      console.error("AudioContext not supported or blocked:", e);
-      // Fallback for browsers that don't support AudioContext
+      console.error("AudioContext not supported:", e);
+      // Simple fallback
       audioCtx = {
         createOscillator: () => ({ 
           frequency: { value: 0 },
@@ -37,16 +37,127 @@ document.addEventListener('DOMContentLoaded', () => {
           connect: () => {}
         }),
         destination: {},
-        currentTime: 0
+        currentTime: 0,
+        state: 'running'
       };
       audioInitialized = true;
     }
   }
   
-  // Try to initialize immediately - will likely be suspended in many browsers
+  // initialize immediately 
   initializeAudio();
-
   const gameState = new GameState();
+
+  // control the difficulty of the levels
+  const difficultyManager = {
+    settings: {
+      speed: {min: 0.5, max: 1.2},
+      sequenceDelay: 1000,
+      shapeDuration:500
+    },
+
+    applyScaling(level, shapes = null) {
+      // Calculate speed multiplier capped at 2x
+      const speedMultiplier = Math.min(1 + (level - 1) * 0.1, 2.0);
+      
+      // Update shape speeds if provided
+      if (shapes && Array.isArray(shapes)) {
+        shapes.forEach(shape => {
+          // Apply speed multiplier
+          shape.speedX *= speedMultiplier;
+          shape.speedY *= speedMultiplier;
+          
+          // Limit maximum speed
+          const maxSpeed = 3;
+          if (Math.abs(shape.speedX) > maxSpeed) {
+            shape.speedX = (shape.speedX > 0) ? maxSpeed : -maxSpeed;
+          }
+          if (Math.abs(shape.speedY) > maxSpeed) {
+            shape.speedY = (shape.speedY > 0) ? maxSpeed : -maxSpeed;
+          }
+        });
+      }
+      
+    return {
+        sequenceDelay: Math.max(this.baseSettings.sequenceDelay - ((level - 1) * 50), 400),
+        shapeDuration: Math.max(this.baseSettings.shapeDuration - ((level - 1) * 25), 200)
+      };
+    },
+    
+    getBaseSpeed() {
+      return this.baseSettings.speed;
+    }
+  };
+
+  const gameTimer ={
+    element: document.querySelector('.timer-display'),
+    interval:null,
+    timeLeft: 0,
+
+    start(duration,onComplete){
+      this.reset();
+      this.timeLeft= Math.max(1, Math.floor(duration));
+      this.update();
+      this.show();
+
+      this.interval = setInterval(() => {
+        this.timeLeft--;
+        this.update();
+        
+        if (this.timeLeft <= 0) {
+          this.stop();
+          if (onComplete) onComplete();
+        }
+      }, 1000);
+    },
+
+
+    update() {
+      const timerValue = document.getElementById('timer-value');
+      if (timerValue) {
+        timerValue.textContent = this.timeLeft;
+        
+        // Add warning style when time is low
+        if (this.timeLeft <= 3) {
+          this.element.style.color = '#f44336';
+          this.element.style.animation = 'pulse 0.5s infinite alternate';
+        } else {
+          this.element.style.color = '#fff';
+          this.element.style.animation = 'pulse 1s infinite alternate';
+        }
+      }
+      return this;
+    },
+    
+    stop() {
+      if (this.interval) {
+        clearInterval(this.interval);
+        this.interval = null;
+      }
+      return this;
+    },
+    
+    reset() {
+      this.stop();
+      this.timeLeft = 0;
+      this.hide();
+      return this;
+    },
+    
+    show() {
+      if (this.element) this.element.style.opacity = '1';
+      return this;
+    },
+    
+    hide() {
+      if (this.element) this.element.style.opacity = '0';
+      return this;
+    },
+    
+    calculateDuration(level) {
+      return Math.max(10 - ((level - 1) * 0.5), 3);
+    }
+  };
 
   // Get the DOM elements 
   const screens = {
@@ -67,63 +178,38 @@ document.addEventListener('DOMContentLoaded', () => {
     finalScore: document.getElementById('final-score'),
     message: document.getElementById('message'),
     messageWrong: document.getElementById('messageWrong'),
-    gallery: document.getElementById('gallery')
   };
 
-  // Define message elements for easy reference
+  // Define message elements
   const successMessage = displays.message;
   const errorMessage = displays.messageWrong;
 
+  //create timer 
+  gameTimer.create();
+
   // Get the shapes container
   const shapesContainer = document.querySelector('.shapes-container');
-  
-  // Clear the container before adding our elements
-  shapesContainer.innerHTML = '';
-  
-  // Set up container for moving shapes
-  shapesContainer.style.position = 'relative';
-  shapesContainer.style.height = '400px';
-  
-  // Make sure shapes are defined - these are the SVG shapes from shapes.js
-  console.log("Shape SVGs loaded:", { raro, prisma, estrella, circle });
-  
-  // Shape SVGs
   const shapeSvgs = [raro, prisma, estrella, circle];
+  console.log("Shape SVGs loaded:", { raro, prisma, estrella, circle });
   
   // Initialize moving shapes with improved settings for better visibility
   const movingShapes = new MovingShapes(shapesContainer, shapeSvgs, {
-    count: 1, // Reduced to 1 of each shape type (4 total) for simplicity
-    speed: { min: 0.5, max: 1.2 }, // Slowed down for better visibility
-    size: { min: 70, max: 90 } // Increased size for better visibility and interaction
+    count: 1, 
+    speed:difficultyManager.getBaseSpeed(), 
+    size: { min: 50, max: 70 } 
   });
   
-  // Set up callbacks for the moving shapes
   movingShapes.onShapeActivate = (data) => {
-    // Make sure audio is initialized
-    if (!audioInitialized) {
-      initializeAudio();
-    }
+    if (!audioInitialized) initializeAudio();
     
-    // Play sound for the activated shape
     const soundInfo = gameState.soundMap[data.typeIndex];
     try {
-      // Make sure audio context is running
       if (audioCtx.state === 'suspended') {
         audioCtx.resume().then(() => {
-          const sound = new SoundObject(
-            audioCtx,
-            soundInfo.frequency,
-            soundInfo.type,
-            soundInfo.duration
-          );
+          new SoundObject(audioCtx, soundInfo.frequency, soundInfo.type, soundInfo.duration);
         });
       } else {
-        const sound = new SoundObject(
-          audioCtx,
-          soundInfo.frequency,
-          soundInfo.type,
-          soundInfo.duration
-        );
+        new SoundObject(audioCtx, soundInfo.frequency, soundInfo.type, soundInfo.duration);
       }
     } catch (e) {
       console.error("Error playing sound:", e);
@@ -132,22 +218,11 @@ document.addEventListener('DOMContentLoaded', () => {
   
   movingShapes.onSequencePlay = (data) => {
     if (data.ready) {
-      // Sequence finished playing, player can interact
       buttons.play.disabled = false;
-      
-      // FIXED: Now explicitly enables player interaction
       movingShapes.canPlayerInteract = true;
-      console.log("Sequence finished playing, player can now interact");
-    }
-  };
+
   
-  movingShapes.onSequenceComplete = (data) => {
-    if (data.success) {
-      // Update score and level
-      gameState.score += gameState.level * 10;
-      updateDisplay(gameState.score, gameState.level);
-      showMessage(successMessage);
-      
+  
       // Flash green for success
       AnimationEffects.flashBackground(document.body, 'rgba(0, 255, 0, 0.2)', 500);
       
