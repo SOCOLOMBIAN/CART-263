@@ -21,7 +21,7 @@ class Iris {
       this.targetX = this.x;
       this.targetY = this.y;
       this.movementSpeed = 0.02 + Math.random() * 0.03;
-      this.scale = 0.5 + (this.petalWidth * 2);
+      this.scale = 0.5 + (this.petalWidth * 1.5);
       
       // interaction properties
       this.isHovered = false;

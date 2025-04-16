@@ -26,8 +26,10 @@ let possibleColor= ["#5d3fd3","#a73fd3","#d33fb5","#d35d3f","#d3a73f"];
         color: addRandomColor
     };
   });
-
-  const visualization= new irisVisualization(irisesWithColorsSorted);
+ 
+  const irisesWithColorsSorted = irisesWithColors.toSorted((a, b) => a.petalWidth - b.petalWidth);
+  
+  const visualization= new IrisVisualization(irisesWithColorsSorted);
   visualization.init();
  
  console.log(" colors",irisesWithColors);
@@ -93,10 +95,6 @@ const theEvery2 = irisesWithColors.every(
         return(iris.sepalWidth > 1.2);
     });
 console.log(theEvery2); 
-
-
-// toSorted irisesWithColors on petal width smalles to largest 
-const irisesWithColorsSorted = irisesWithColors.toSorted((a, b) => a.petalWidth - b.petalWidth);
 
 console.log (irisesWithColorsSorted);
 

@@ -4,8 +4,8 @@ class IrisVisualization {
     this.irises = [];
     this.canvas = null;
     this.ctx = null;
-    this.canvasWidth = 0;
-    this.canvasHeight = 0;
+    this.canvasWidth = 950;
+    this.canvasHeight = 650;
     this.mouseX = 0;
     this.mouseY = 0;
     }
@@ -17,13 +17,13 @@ init() {
     this.canvas.width = this.canvasWidth;
     this.canvas.height = this.canvasHeight;
 
+    document.body.appendChild(this.canvas);
+
     this.createIrises();
-
     this.setupEventListeners();
-
-    this.aniamte();
-
     this.positionBySpecies();
+
+    this.animate();
 }
 
 //create irises with the data 
@@ -63,18 +63,18 @@ createIrises() {
         let targetX, targetY;
 
         if (iris.species === 'setosa') {
-            targetX = this.canvasWidth * 0.25;
+            targetX = this.canvasWidth * 0.15;
             targetY = this.canvasHeight * 0.5;
           } else if (iris.species === 'versicolor') {
             targetX = this.canvasWidth * 0.5;
             targetY = this.canvasHeight * 0.5;
           } else if (iris.species === 'virginica') {
-            targetX = this.canvasWidth * 0.75;
+            targetX = this.canvasWidth * 0.85;
             targetY = this.canvasHeight * 0.5;
           } 
           
-    targetX += (Math.random() - 0.5) * 150;
-    targetY += (Math.random() - 0.5) * 150;
+    targetX += (Math.random() - 0.5) * 200;
+    targetY += (Math.random() - 0.5) * 200;
       
       iris.moveTowards(targetX, targetY);
     }
@@ -82,6 +82,9 @@ createIrises() {
   
   animate (){
     this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+    this.ctx.fillStyle = '#000000'; 
+    this.ctx.fillRect(50, 80, this.canvasWidth, this.canvasHeight);
 
     for (const iris of this.irises) {
         iris.update();
