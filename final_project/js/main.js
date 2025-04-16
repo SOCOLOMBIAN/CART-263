@@ -4,7 +4,6 @@
  * coordinates game flow,user interaction, and the integration of all components 
  */
 
-
 document.addEventListener('DOMContentLoaded', () => { 
   
   // Initialize the particle background
@@ -28,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
       audioInitialized = true;
   
 
-      new SoundObject(audioCtx, 0, 'sine', 0.1);
+      new SoundObject(audioCtx, 0, 'square', 0.1);
     } catch (e) {
       console.error("AudioContext not supported:", e);
       // Simple fallback

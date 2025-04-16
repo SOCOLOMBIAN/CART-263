@@ -37,7 +37,7 @@ class MovingShapes {
   
   preloadSVGImages() {
     this.svgImages = [];
-    const loadPromises = [];
+    this.imagesLoaded = false;
     
     for (let i = 0; i < this.shapesData.length; i++) {
       const svgString = this.shapesData[i];
@@ -49,14 +49,18 @@ class MovingShapes {
    * this part was made wiith the help of AI const load promise, to make sure
    * the svg load proper
    */
-    img.onload = () =>{
-      this.f=this.drawShape();
-    };
-
+  img.onload = () => {
+    // Optionally redraw if all images are loaded
+    if (this.svgImages.every(img => img.image.complete)) {
+      this.imagesLoaded = true;
+      this.redrawShapes();
+    }
+  };
     img.src = url;
       this.svgImages.push({ image: img, url });
     }
   }
+
   resizeCanvas() {
     const rect = this.container.getBoundingClientRect();
     this.canvas.width = rect.width;
@@ -143,7 +147,13 @@ class MovingShapes {
     
     requestAnimationFrame(() => this.animate());
   }
-  
+
+  redrawShapes() {
+    if (!this.ctx) return;
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.shapes.forEach(shape => this.drawShape(shape));
+  }
+
   drawShape(shape) {
     if (!this.ctx) return;
     
@@ -156,11 +166,11 @@ class MovingShapes {
     // Draw color highlight if active
     if (shape.active) {
       this.ctx.shadowColor = this.options.activeColor;
-      this.ctx.shadowBlur = 15;
+      this.ctx.shadowBlur = 20;
       
       this.ctx.beginPath();
       this.ctx.arc(0, 0, shape.size/1.5, 0, Math.PI * 2);
-      this.ctx.fillStyle = `rgba(76, 175, 80, 0.3)`;
+      this.ctx.fillStyle = ` rgba(61, 26, 202, 0.3)`; //colors when higlight the shape
       this.ctx.fill();
     }
     
@@ -276,7 +286,7 @@ class MovingShapes {
             position: this.playerSequence.length - 1
           });
         }
-      }, 300);
+      }, 200);
       
       this.canPlayerInteract = false;
     }
@@ -297,7 +307,7 @@ class MovingShapes {
       }
       return;
     }
-    
+
     this.activeSequence = [...sequence];
     this.playerSequence = [];
     this.isPlayingSequence = true;
