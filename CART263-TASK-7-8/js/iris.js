@@ -20,12 +20,24 @@ class iris{
     this.y = Math.random() * canvasHeight;
     this.targetX = this.x;
     this.targetY = this.y;
-    this.mouvementSpeed= 0.02 + Math.random() * 0.03;
-    this.scale= 0.5 + (this.petalWidth *2);
-
-    // interaction propieties 
-
-
-     
+    this.movementSpeed= 0.02 + Math.random() * 0.03;
+    this.scale= 0.5 + (this.petalWidth *2); 
     }
+
+    moveTowards(targetX, targetY) {
+        this.targetX = targetX;
+        this.targetY = targetY;
+      }
+ 
+     update() {
+        // Move towards target position
+        this.x += (this.targetX - this.x) * this.movementSpeed;
+        this.y += (this.targetY - this.y) * this.movementSpeed;
+      
+
+
+
+
+
+
 }
