@@ -11,7 +11,7 @@ class iris{
 
     //propieties 
     this.canvas=canvas;
-    this.ctx=getContext('2d');
+    this.ctx= canvas.getContext('2d');
     this.canvasWidth;
     this.canvasHeight=canvasHeight;
 
@@ -29,15 +29,31 @@ class iris{
         this.targetY = targetY;
       }
  
-     update() {
+    update() {
         // Move towards target position
         this.x += (this.targetX - this.x) * this.movementSpeed;
         this.y += (this.targetY - this.y) * this.movementSpeed;
-      
+    }
 
+//draw iris on the canvas
+    draw() {
+        const ctx= this.ctx;
+        
+        //save current state 
+        ctx.save();
 
+        //move iris position 
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotationAngle);
 
+        //scale size
+        const pulseScale = this.isHovered || this.isSelected ? 1 + (this.pulseValue * 0.2) : 1;
+        const finalScale = this.scale * pulseScale;
+        ctx.scale(finalScale, finalScale);
 
+        this.drawFlower(ctx);
 
-
+        //restor the context of the flower
+        ctx.restore();
+}
 }
