@@ -1,8 +1,7 @@
 class MovingShapes {
-  constructor(container, shapesData, gameState, options = {}) {
+  constructor(container, shapesData, options = {}) {
     this.container = typeof container === 'string' ? document.querySelector(container) : container;
     this.shapesData = shapesData; // Array of SVG strings
-    this.gameState = gameState; //acces to the state of the game
     this.options = { //options for the shapes
       count: options.count || 1,
       speed: options.speed || { min: 0.5, max: 1.5 },
@@ -13,6 +12,12 @@ class MovingShapes {
       ...options
     };
 
+    //key properties
+    this.activeSequence = [];
+    this.playerSequence = [];
+    this.isPlayingSequence = false;
+    this.canPlayerInteract = false;
+
     // Create canvas
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d');
@@ -22,6 +27,8 @@ class MovingShapes {
     // Moving shapes collection and game state
     this.shapes = [];
     this.currentPlayIndex = 0;
+    this.svgImages = [];
+    this.imagesLoaded = false;
     
     // Initialize shapes and load SVG images
     this.initShapes();
@@ -38,25 +45,33 @@ class MovingShapes {
   preloadSVGImages() {
     this.svgImages = [];
     this.imagesLoaded = false;
+    let loadedCount = 0;
     
+    const checkAllLoaded = () => {
+      loadedCount++;
+      if (loadedCount === this.shapesData.length) {
+        this.imagesLoaded = true;
+        this.redrawShapes();
+        console.log("All SVG images loaded successfully");
+      }
+    };
+
     for (let i = 0; i < this.shapesData.length; i++) {
       const svgString = this.shapesData[i];
       const svgBlob = new Blob([svgString], {type: 'image/svg+xml'});
       const url = URL.createObjectURL(svgBlob);
       const img = new Image();
+
+      img.onload = () => {
+        checkAllLoaded();
+      };
       
-  /**
-   * this part was made wiith the help of AI const load promise, to make sure
-   * the svg load proper
-   */
-  img.onload = () => {
-    // Optionally redraw if all images are loaded
-    if (this.svgImages.every(img => img.image.complete)) {
-      this.imagesLoaded = true;
-      this.redrawShapes();
-    }
-  };
-    img.src = url;
+      img.onerror = (e) => {
+        console.error(`Error loading SVG image ${i}:`, e);
+        checkAllLoaded(); // Continue with other images
+      };
+      
+      img.src = url;
       this.svgImages.push({ image: img, url });
     }
   }
@@ -170,7 +185,7 @@ class MovingShapes {
       
       this.ctx.beginPath();
       this.ctx.arc(0, 0, shape.size/1.5, 0, Math.PI * 2);
-      this.ctx.fillStyle = ` rgba(61, 26, 202, 0.3)`; //colors when higlight the shape
+      this.ctx.fillStyle = ` rgba(61, 26, 202, 0.3)`; //colors when highlight the shape
       this.ctx.fill();
     }
     
@@ -185,6 +200,13 @@ class MovingShapes {
           -shape.size/2, -shape.size/2,
           shape.size, shape.size
         );
+      } else {
+        // Draw a placeholder if image is not loaded
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, shape.size/2, 0, Math.PI * 2);
+        this.ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+        this.ctx.lineWidth = 3;
+        this.ctx.stroke();
       }
     }
     
