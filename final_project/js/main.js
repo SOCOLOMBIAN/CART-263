@@ -1,7 +1,7 @@
 /**
  * main.js
  * Main entry point for the chromatic sound sequences game
- * coordinates game flow,user interaction, and the integration of all components 
+ * coordinates game flow, user interaction, and the integration of all components 
  */
 
 document.addEventListener('DOMContentLoaded', () => { 
@@ -50,9 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // Don't initialize immediately to avoid autoplay restrictions
-  // We'll initialize on first user interaction instead
-  
   const gameState = new GameState();
 
   // control the difficulty of the levels
@@ -96,75 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Make sure the game timer is initialized
-  const gameTimer = {
-    element: document.querySelector('.timer-display'),
-    interval: null,
-    timeLeft: 0,
-
-    start(duration, onComplete) {
-      this.reset();
-      this.timeLeft = Math.max(1, Math.floor(duration));
-      this.update();
-      this.show();
-
-      this.interval = setInterval(() => {
-        this.timeLeft--;
-        this.update();
-        
-        if (this.timeLeft <= 0) {
-          this.stop();
-          if (onComplete) onComplete();
-        }
-      }, 1000);
-    },
-
-    update() {
-      const timerValue = document.getElementById('timer-value');
-      if (timerValue) {
-        timerValue.textContent = this.timeLeft;
-        
-        // Add warning style when time is low
-        if (this.timeLeft <= 3) {
-          this.element.style.color = '#f44336';
-          this.element.style.animation = 'pulse 0.5s infinite alternate';
-        } else {
-          this.element.style.color = '#fff';
-          this.element.style.animation = 'pulse 1s infinite alternate';
-        }
-      }
-      return this;
-    },
-    
-    stop() {
-      if (this.interval) {
-        clearInterval(this.interval);
-        this.interval = null;
-      }
-      return this;
-    },
-    
-    reset() {
-      this.stop();
-      this.timeLeft = 0;
-      this.hide();
-      return this;
-    },
-    
-    show() {
-      if (this.element) this.element.style.opacity = '1';
-      return this;
-    },
-    
-    hide() {
-      if (this.element) this.element.style.opacity = '0';
-      return this;
-    },
-    
-    calculateDuration(level) {
-      return Math.max(10 - ((level - 1) * 0.5), 3);
-    }
-  };
+  // Use the timer from timer.js
+  const gameTimer = window.gameTimer;
+  gameTimer.create(); // Initialize the timer element
 
   // Get the DOM elements 
   const screens = {
@@ -235,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
       movingShapes.canPlayerInteract = true;
 
       // Start timer
-      const timerDuration = gameTimer.calculateDuration(gameState.level);
+      const timerDuration = GameTimer.calculateDuration(gameState.level);
       gameTimer.start(timerDuration, () => {
         movingShapes.onSequenceError({ error: "Time's up!" });
       });
@@ -319,9 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Show a loading message if SVGs aren't ready yet
     if (movingShapes && !movingShapes.imagesReady) {
-      console.log("SVGs still loading, showing loading message");
-      
-      // Create a temporary loading message
       const loadingMsg = document.createElement('div');
       loadingMsg.textContent = 'Loading shapes...';
       loadingMsg.style.position = 'absolute';
