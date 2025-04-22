@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 846.89 600.28">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke-width: 9px;
+      }
+
+      .cls-1, .cls-2 {
+        fill: none;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-1, .cls-2, .cls-4 {
+        stroke: #fff;
+      }
+
+      .cls-2 {
+        stroke-width: 12px;
+      }
+
+      .cls-3 {
+        fill: #231f20;
+        stroke: #231f20;
+      }
+
+      .cls-3, .cls-4 {
+        stroke-width: 5px;
+      }
+
+      .cls-4 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <g id="background">
+    <rect class="cls-3" x="2.5" y="2.5" width="841.89" height="595.28"/>
+  </g>
+  <g id="grande">
+    <circle class="cls-2" cx="423.44" cy="300.14" r="246.35"/>
+  </g>
+  <g id="centro">
+    <circle class="cls-1" cx="423.44" cy="300.14" r="177.55"/>
+  </g>
+  <g id="pequeno">
+    <circle class="cls-4" cx="423.44" cy="300.14" r="114.08"/>
+  </g>
+</svg>
