@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
       new SoundObject(audioCtx, 0, 'square', 0.1);
     } catch (e) {
       console.error("AudioContext not supported:", e);
-      // Simple fallback
+  
       audioCtx = {
         createOscillator: () => ({ 
           frequency: { value: 0 },
