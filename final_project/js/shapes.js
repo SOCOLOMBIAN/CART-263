@@ -1,4 +1,3 @@
-
 /**
  * shapes.js
  * Defines SVG shapes used in the game.

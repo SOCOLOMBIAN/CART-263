@@ -38,65 +38,92 @@ class MovingShapes {
     this.canvas.addEventListener('click', (e) => this.handleClick(e));
     
     // Preload SVGs first, then start animation when ready
+    console.log("Starting SVG preload...");
     this.preloadSVGImages().then(() => {
       this.imagesReady = true;
+      console.log("All SVG images loaded, starting animation");
       this.animate();
-      console.log("All SVG images loaded successfully");
     }).catch(error => {
-      console.error("Error loading SVGs:", error);
+      console.error("Error during SVG loading:", error);
       // Still start animation with fallback shapes
+      this.imagesReady = false;
+      console.log("Starting animation with fallback shapes");
       this.animate();
     });
   }
   
   preloadSVGImages() {
     return new Promise((resolve, reject) => {
+      // Clear any existing SVG images
       this.svgImages = [];
       let loadedCount = 0;
       let errorCount = 0;
       
       const checkAllLoaded = () => {
         loadedCount++;
+        console.log(`SVG loaded: ${loadedCount}/${this.shapesData.length}`);
         if (loadedCount + errorCount === this.shapesData.length) {
-          if (errorCount === this.shapesData.length) {
-            reject(new Error("All SVG images failed to load"));
-          } else {
+          if (loadedCount > 0) {
+            console.log("All SVGs loaded successfully");
             resolve();
+          } else {
+            console.error("All SVG images failed to load");
+            reject(new Error("All SVG images failed to load"));
           }
         }
       };
 
-      const handleError = () => {
+      const handleError = (index) => {
         errorCount++;
+        console.error(`Error loading SVG image at index ${index}`);
         if (loadedCount + errorCount === this.shapesData.length) {
-          if (errorCount === this.shapesData.length) {
-            reject(new Error("All SVG images failed to load"));
-          } else {
+          if (loadedCount > 0) {
+            console.log("Some SVGs loaded successfully");
             resolve();
+          } else {
+            console.error("All SVG images failed to load");
+            reject(new Error("All SVG images failed to load"));
           }
         }
       };
 
+      // Process each SVG in the shapes data
       for (let i = 0; i < this.shapesData.length; i++) {
         const svgString = this.shapesData[i];
-        const svgBlob = new Blob([svgString], {type: 'image/svg+xml'});
-        const url = URL.createObjectURL(svgBlob);
-        const img = new Image();
-
-        img.onload = checkAllLoaded;
-        img.onerror = () => {
-          console.error(`Error loading SVG image ${i}`);
-          handleError();
-        };
+        if (!svgString) {
+          handleError(i);
+          continue;
+        }
         
-        img.src = url;
-        this.svgImages.push({ image: img, url });
+        try {
+          // Create SVG blob and URL
+          const svgBlob = new Blob([svgString], {type: 'image/svg+xml'});
+          const url = URL.createObjectURL(svgBlob);
+          const img = new Image();
+
+          // Set up event handlers
+          img.onload = () => {
+            this.svgImages[i] = { image: img, url };
+            checkAllLoaded();
+          };
+          
+          img.onerror = () => {
+            console.error(`Error loading SVG image ${i}`, svgString.substring(0, 50) + "...");
+            handleError(i);
+          };
+          
+          // Start loading the image
+          img.src = url;
+        } catch (error) {
+          console.error(`Error processing SVG ${i}:`, error);
+          handleError(i);
+        }
       }
       
       // Add a timeout in case images don't load
       setTimeout(() => {
         if (loadedCount + errorCount < this.shapesData.length) {
-          console.warn("SVG loading timed out, starting with available images");
+          console.warn("SVG loading timed out after 3 seconds, proceeding with available images");
           resolve();
         }
       }, 3000);
@@ -191,9 +218,18 @@ class MovingShapes {
   }
 
   redrawShapes() {
-    if (!this.ctx) return;
+    if (!this.ctx || !this.shapes) return;
+    
+    // Force full redraw
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.shapes.forEach(shape => this.drawShape(shape));
+    
+    // Draw each shape
+    for (const shape of this.shapes) {
+      this.drawShape(shape);
+    }
+    
+    // Log for debugging
+    console.log(`Redrew ${this.shapes.length} shapes, SVGs ready: ${this.imagesReady}`);
   }
 
   drawShape(shape) {
@@ -212,24 +248,28 @@ class MovingShapes {
       
       this.ctx.beginPath();
       this.ctx.arc(0, 0, shape.size/1.5, 0, Math.PI * 2);
-      this.ctx.fillStyle = `rgba(61, 26, 202, 0.3)`; //colors when highlight the shape
+      this.ctx.fillStyle = `rgba(61, 26, 202, 0.3)`; // colors when highlight the shape
       this.ctx.fill();
     }
     
-    // Use preloaded SVG image if available
-    if (this.svgImages && this.svgImages[shape.typeIndex] && 
-        this.svgImages[shape.typeIndex].image && 
-        this.svgImages[shape.typeIndex].image.complete) {
+    // Check if SVG images are properly loaded
+    const svgImage = this.svgImages && this.svgImages[shape.typeIndex];
+    const imageReady = svgImage && svgImage.image && svgImage.image.complete && svgImage.image.naturalHeight !== 0;
+    
+    if (imageReady) {
+      // Use preloaded SVG image
       this.ctx.globalAlpha = shape.active ? 1.0 : shape.opacity;
       this.ctx.drawImage(
-        this.svgImages[shape.typeIndex].image,
+        svgImage.image,
         -shape.size/2, -shape.size/2,
         shape.size, shape.size
       );
     } else {
-      // Draw a placeholder if image is not loaded
+      // Draw a visible placeholder if image is not loaded
       this.ctx.beginPath();
       this.ctx.arc(0, 0, shape.size/2, 0, Math.PI * 2);
+      this.ctx.fillStyle = shape.active ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 0.4)";
+      this.ctx.fill();
       this.ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
       this.ctx.lineWidth = 3;
       this.ctx.stroke();

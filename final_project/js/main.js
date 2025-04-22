@@ -314,15 +314,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
   //game state functions 
   function startGame() {
+    // First hide the intro screen
     screens.intro.classList.remove('active');
-    screens.game.classList.add('active');
     
-    const state = gameState.resetGame();
-    updateDisplay(state.score, state.level);
+    // Show a loading message if SVGs aren't ready yet
+    if (movingShapes && !movingShapes.imagesReady) {
+      console.log("SVGs still loading, showing loading message");
+      
+      // Create a temporary loading message
+      const loadingMsg = document.createElement('div');
+      loadingMsg.textContent = 'Loading shapes...';
+      loadingMsg.style.position = 'absolute';
+      loadingMsg.style.top = '50%';
+      loadingMsg.style.left = '50%';
+      loadingMsg.style.transform = 'translate(-50%, -50%)';
+      loadingMsg.style.fontSize = '24px';
+      loadingMsg.style.color = '#fff';
+      loadingMsg.style.zIndex = '1000';
+      document.body.appendChild(loadingMsg);
+      
+      // Wait for SVG images to load before continuing
+      const checkInterval = setInterval(() => {
+        if (movingShapes.imagesReady) {
+          clearInterval(checkInterval);
+          document.body.removeChild(loadingMsg);
+          continueStartGame();
+        }
+      }, 100);
+      
+      // Timeout after 5 seconds in case loading takes too long
+      setTimeout(() => {
+        if (!movingShapes.imagesReady) {
+          clearInterval(checkInterval);
+          document.body.removeChild(loadingMsg);
+          movingShapes.imagesReady = true; // Force continue with fallbacks
+          continueStartGame();
+        }
+      }, 5000);
+    } else {
+      // SVGs are already loaded, continue with game start
+      continueStartGame();
+    }
     
-    gameState.generateNextSequence();
-    buttons.play.disabled = false;
-    movingShapes.reset();
+    function continueStartGame() {
+      // Show the game screen
+      screens.game.classList.add('active');
+      
+      const state = gameState.resetGame();
+      updateDisplay(state.score, state.level);
+      
+      gameState.generateNextSequence();
+      buttons.play.disabled = false;
+      movingShapes.reset();
+      
+      // Force redraw of shapes to ensure they appear
+      movingShapes.redrawShapes();
+    }
   }
 
   function restartGame() {
@@ -335,6 +382,9 @@ document.addEventListener('DOMContentLoaded', () => {
     gameState.generateNextSequence();
     buttons.play.disabled = false;
     movingShapes.reset();
+    
+    // Force redraw shapes here too
+    movingShapes.redrawShapes();
   }
 
   function updateDisplay(score, level) {
