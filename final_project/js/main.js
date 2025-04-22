@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       audioInitialized = true;
   
-
+      // Test initial sound object
       new SoundObject(audioCtx, 0, 'square', 0.1);
     } catch (e) {
       console.error("AudioContext not supported:", e);
@@ -50,8 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // initialize immediately 
-  initializeAudio();
+  // Don't initialize immediately to avoid autoplay restrictions
+  // We'll initialize on first user interaction instead
+  
   const gameState = new GameState();
 
   // control the difficulty of the levels
@@ -59,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     baseSettings: {
       speed: {min: 0.5, max: 1.2},
       sequenceDelay: 1000,
-      shapeDuration:500
+      shapeDuration: 500
     },
 
     applyScaling(level, shapes = null) {
@@ -84,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
       
-    return {
+      return {
         sequenceDelay: Math.max(this.baseSettings.sequenceDelay - ((level - 1) * 50), 400),
         shapeDuration: Math.max(this.baseSettings.shapeDuration - ((level - 1) * 25), 200)
       };
@@ -95,14 +96,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const gameTimer ={
+  // Make sure the game timer is initialized
+  const gameTimer = {
     element: document.querySelector('.timer-display'),
-    interval:null,
+    interval: null,
     timeLeft: 0,
 
-    start(duration,onComplete){
+    start(duration, onComplete) {
       this.reset();
-      this.timeLeft= Math.max(1, Math.floor(duration));
+      this.timeLeft = Math.max(1, Math.floor(duration));
       this.update();
       this.show();
 
@@ -116,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }, 1000);
     },
-
 
     update() {
       const timerValue = document.getElementById('timer-value');
@@ -192,17 +193,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Get the shapes container
   const shapesContainer = document.querySelector('.shapes-container');
+  
+  // Ensure SVG variables are defined before using them
+  if (typeof raro === 'undefined' || typeof prisma === 'undefined' || 
+      typeof estrella === 'undefined' || typeof circle === 'undefined') {
+    console.error("SVG shapes are not defined. Check shapes.js inclusion.");
+    return; // Exit initialization if shapes aren't available
+  }
+  
   const shapeSvgs = [raro, prisma, estrella, circle];
   
   // Initialize moving shapes with improved settings for better visibility
   const movingShapes = new MovingShapes(shapesContainer, shapeSvgs, {
     count: 1, 
-    speed:difficultyManager.getBaseSpeed(), 
+    speed: difficultyManager.getBaseSpeed(), 
     size: { min: 50, max: 70 } 
   });
   
   //shape callbacks
   movingShapes.onShapeActivate = (data) => {
+    // Initialize audio if needed
     if (!audioInitialized) initializeAudio();
     
     const soundInfo = gameState.soundMap[data.typeIndex];
@@ -224,55 +234,55 @@ document.addEventListener('DOMContentLoaded', () => {
       buttons.play.disabled = false;
       movingShapes.canPlayerInteract = true;
 
-            // Start timer
-            const timerDuration = gameTimer.calculateDuration(gameState.level);
-            gameTimer.start(timerDuration, () => {
-              movingShapes.onSequenceError({ error: "Time's up!" });
-            });
-          }
-        };
+      // Start timer
+      const timerDuration = gameTimer.calculateDuration(gameState.level);
+      gameTimer.start(timerDuration, () => {
+        movingShapes.onSequenceError({ error: "Time's up!" });
+      });
+    }
+  };
 
   // the user completes the sequence
   movingShapes.onSequenceComplete = (data) => {
-      if (data.success) {
-        // Stop timer
-         gameTimer.stop().hide();
+    if (data.success) {
+      // Stop timer
+      gameTimer.stop().hide();
+    
+      // Update score and level
+      gameState.score += gameState.level * 10;
+      updateDisplay(gameState.score, gameState.level);
+      showMessage(successMessage);
       
-       // Update score and level
-       gameState.score += gameState.level * 10;
-       updateDisplay(gameState.score, gameState.level);
-       showMessage(successMessage);
-       
-       // Visual feedback
-       AnimationEffects.flashBackground(document.body, 'rgba(0, 255, 0, 0.2)', 500);
- 
-       // Level up after delay
-       setTimeout(() => {
-       const newState = gameState.levelUp();
-       updateDisplay(newState.score, newState.level);
+      // Visual feedback
+      AnimationEffects.flashBackground(document.body, 'rgba(0, 255, 0, 0.2)', 500);
+
+      // Level up after delay
+      setTimeout(() => {
+        const newState = gameState.levelUp();
+        updateDisplay(newState.score, newState.level);
          
-         // Apply difficulty scaling
-         const difficultySettings = difficultyManager.applyScaling(
-           gameState.level, 
-           movingShapes.shapes
-         );
+        // Apply difficulty scaling
+        const difficultySettings = difficultyManager.applyScaling(
+          gameState.level, 
+          movingShapes.shapes
+        );
          
-         // Reset game state for next level
-         gameState.generateNextSequence();
-         gameState.isPlaying = false;
-         gameState.canPlayerInteract = false;
+        // Reset game state for next level
+        gameState.generateNextSequence();
+        gameState.isPlaying = false;
+        gameState.canPlayerInteract = false;
          
-         // Reset state
-         buttons.play.disabled = false;
-         movingShapes.reset();
-         movingShapes.isPlayingSequence = false;
-         movingShapes.canPlayerInteract = false;
-       }, 1500);
-     }
-   };
+        // Reset state
+        buttons.play.disabled = false;
+        movingShapes.reset();
+        movingShapes.isPlayingSequence = false;
+        movingShapes.canPlayerInteract = false;
+      }, 1500);
+    }
+  };
 
   // error of the user in the sequence 
-   movingShapes.onSequenceError = (data) => {
+  movingShapes.onSequenceError = (data) => {
     // Stop timer
     gameTimer.stop().hide();
     
@@ -285,8 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(endGame, 1000);
   };
 
-  // Add button event listeners
+  // Add button event listeners with initialization
   buttons.start.addEventListener('click', (e) => {
+    initializeAudio(); // Ensure audio is initialized on first interaction
     AnimationEffects.createRipple(e, 'rgba(76, 175, 80, 0.5)');
     startGame();
   });
@@ -301,79 +312,77 @@ document.addEventListener('DOMContentLoaded', () => {
     playSequence();
   });
 
-//game state functions 
-
-function startGame() {
-  screens.intro.classList.remove('active');
-  screens.game.classList.add('active');
-  
-  const state = gameState.resetGame();
-  updateDisplay(state.score, state.level);
-  
-  gameState.generateNextSequence();
-  buttons.play.disabled = false;
-  movingShapes.reset();
-}
-
-function restartGame() {
-  screens.gameOver.classList.remove('active');
-  screens.game.classList.add('active');
-  
-  const state = gameState.resetGame();
-  updateDisplay(state.score, state.level);
-  
-  gameState.generateNextSequence();
-  buttons.play.disabled = false;
-  movingShapes.reset();
-}
-
-function updateDisplay(score, level) {
-  displays.score.textContent = score;
-  displays.level.textContent = level;
-  displays.finalScore.textContent = score;
-}
-
-function playSequence() {
-  // Prevent multiple plays
-  if (gameState.isPlaying || movingShapes.isPlayingSequence) return;
-  
-  const sequence = gameState.startPlayingSequence();
-  buttons.play.disabled = true;
-  
-  // Ensure valid sequence
-  if (!sequence || sequence.length === 0) {
-    gameState.generateNextSequence();
-    const newSequence = gameState.startPlayingSequence();
+  //game state functions 
+  function startGame() {
+    screens.intro.classList.remove('active');
+    screens.game.classList.add('active');
     
-    if (!newSequence || newSequence.length === 0) {
-      buttons.play.disabled = false;
-      return;
-    }
-
-    const settings = difficultyManager.applyScaling(gameState.level);
-    movingShapes.playSequence(newSequence, settings);
-  } else {
-    const settings = difficultyManager.applyScaling(gameState.level);
-    movingShapes.playSequence(sequence, settings);
+    const state = gameState.resetGame();
+    updateDisplay(state.score, state.level);
+    
+    gameState.generateNextSequence();
+    buttons.play.disabled = false;
+    movingShapes.reset();
   }
-}
 
-function showMessage(element) {
-  element.classList.add('visible');
-  setTimeout(() => element.classList.remove('visible'), 1000);
-}
+  function restartGame() {
+    screens.gameOver.classList.remove('active');
+    screens.game.classList.add('active');
+    
+    const state = gameState.resetGame();
+    updateDisplay(state.score, state.level);
+    
+    gameState.generateNextSequence();
+    buttons.play.disabled = false;
+    movingShapes.reset();
+  }
 
-function endGame() {
-  screens.game.classList.remove('active');
-  screens.gameOver.classList.add('active');
-  displays.finalScore.textContent=gameState.score;
-}
+  function updateDisplay(score, level) {
+    displays.score.textContent = score;
+    displays.level.textContent = level;
+    displays.finalScore.textContent = score;
+  }
 
+  function playSequence() {
+    // Prevent multiple plays
+    if (gameState.isPlaying || movingShapes.isPlayingSequence) return;
+    
+    const sequence = gameState.startPlayingSequence();
+    buttons.play.disabled = true;
+    
+    // Ensure valid sequence
+    if (!sequence || sequence.length === 0) {
+      gameState.generateNextSequence();
+      const newSequence = gameState.startPlayingSequence();
+      
+      if (!newSequence || newSequence.length === 0) {
+        buttons.play.disabled = false;
+        return;
+      }
 
-//audio initliazion on user interaction 
+      const settings = difficultyManager.applyScaling(gameState.level);
+      movingShapes.playSequence(newSequence, settings);
+    } else {
+      const settings = difficultyManager.applyScaling(gameState.level);
+      movingShapes.playSequence(sequence, settings);
+    }
+  }
+
+  function showMessage(element) {
+    element.classList.add('visible');
+    setTimeout(() => element.classList.remove('visible'), 1000);
+  }
+
+  function endGame() {
+    screens.game.classList.remove('active');
+    screens.gameOver.classList.add('active');
+    displays.finalScore.textContent = gameState.score;
+  }
+
+  // Initialize audio on any user interaction
   document.addEventListener('click', () => {
     initializeAudio();  
-    if (audioCtx.state === 'suspended') {
+    if (audioCtx && audioCtx.state === 'suspended') {
       try {
         audioCtx.resume().catch(e => console.error("Error resuming AudioContext:", e));
       } catch (e) {
@@ -382,4 +391,3 @@ function endGame() {
     }
   }, {once: true});
 });
-

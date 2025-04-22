@@ -7,7 +7,8 @@
 class AnimationEffects {
   // Create a screen shake effect
   static screenShake(element, intensity = 5, duration = 500) {
-    const startTime= performance.now();
+    const startTime = performance.now();
+    const originalPosition = { x: 0, y: 0 }; // Default position
     
     function shake(currentTime) {
       const elapsed = currentTime - startTime;
@@ -27,7 +28,7 @@ class AnimationEffects {
         requestAnimationFrame(shake);
       } else {
         // Reset to original position
-        element.style.transform = `translate(${originalPosition.x}px, ${originalPosition.y}px)`;
+        element.style.transform = '';
       }
     }  
     // Start the animation
@@ -72,6 +73,7 @@ class AnimationEffects {
     const circle = document.createElement('span');
     const diameter = Math.max(button.clientWidth, button.clientHeight);
     const radius = diameter / 2;
+    
     // Get the button's position
     const rect = button.getBoundingClientRect();
 
@@ -84,22 +86,38 @@ class AnimationEffects {
       circle.style.backgroundColor = color;
     }
     
+    // Make sure we clean up old ripples
+    const oldRipple = button.querySelector('.ripple-effect');
+    if (oldRipple) {
+      oldRipple.remove();
+    }
+    
     button.appendChild(circle);
-    setTimeout(() => circle.remove(), 600);
+    setTimeout(() => {
+      if (circle.parentNode === button) {
+        circle.remove();
+      }
+    }, 600);
   }
     
  /**
  * make element grow size and return to normal
  */
   static pulseElement(element, scale = 1.1, duration = 500) {
-    // Store original transform
+    // Store original transform and transition
     const originalTransform = element.style.transform || 'scale(1)';
+    const originalTransition = element.style.transition || '';
+    
+    // Apply new transform with transition
     element.style.transition = `transform ${duration/2}ms ease-in-out`;
     element.style.transform = `${originalTransform.includes('scale') ? originalTransform : originalTransform + ' scale(1)'} scale(${scale})`; // Scale up
-          
-  // Reset transition
+    
+    // Reset to original after duration
+    setTimeout(() => {
+      element.style.transform = originalTransform;
       setTimeout(() => {
         element.style.transition = originalTransition;
+      }, duration/2);
     }, duration/2);
   }
   
@@ -107,6 +125,20 @@ class AnimationEffects {
  *  Create a floating animation for elements
  */
   static floatElement(element, duration = 2000) {
+    // Define the keyframes if not already in the stylesheet
+    if (!document.querySelector('#float-keyframes')) {
+      const style = document.createElement('style');
+      style.id = 'float-keyframes';
+      style.textContent = `
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+          100% { transform: translateY(0px); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
     // Apply animation
     element.style.animation = `float ${duration}ms ease-in-out infinite`;
   }

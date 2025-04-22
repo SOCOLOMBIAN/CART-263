@@ -17,6 +17,7 @@ class MovingShapes {
     this.playerSequence = [];
     this.isPlayingSequence = false;
     this.canPlayerInteract = false;
+    this.imagesReady = false;
 
     // Create canvas
     this.canvas = document.createElement('canvas');
@@ -28,52 +29,78 @@ class MovingShapes {
     this.shapes = [];
     this.currentPlayIndex = 0;
     this.svgImages = [];
-    this.imagesLoaded = false;
     
     // Initialize shapes and load SVG images
     this.initShapes();
-    this.preloadSVGImages();
     
     // Event listeners
     window.addEventListener('resize', () => this.resizeCanvas());
     this.canvas.addEventListener('click', (e) => this.handleClick(e));
     
-    // Start animation
-    this.animate();
+    // Preload SVGs first, then start animation when ready
+    this.preloadSVGImages().then(() => {
+      this.imagesReady = true;
+      this.animate();
+      console.log("All SVG images loaded successfully");
+    }).catch(error => {
+      console.error("Error loading SVGs:", error);
+      // Still start animation with fallback shapes
+      this.animate();
+    });
   }
   
   preloadSVGImages() {
-    this.svgImages = [];
-    this.imagesLoaded = false;
-    let loadedCount = 0;
-    
-    const checkAllLoaded = () => {
-      loadedCount++;
-      if (loadedCount === this.shapesData.length) {
-        this.imagesLoaded = true;
-        this.redrawShapes();
-        console.log("All SVG images loaded successfully");
+    return new Promise((resolve, reject) => {
+      this.svgImages = [];
+      let loadedCount = 0;
+      let errorCount = 0;
+      
+      const checkAllLoaded = () => {
+        loadedCount++;
+        if (loadedCount + errorCount === this.shapesData.length) {
+          if (errorCount === this.shapesData.length) {
+            reject(new Error("All SVG images failed to load"));
+          } else {
+            resolve();
+          }
+        }
+      };
+
+      const handleError = () => {
+        errorCount++;
+        if (loadedCount + errorCount === this.shapesData.length) {
+          if (errorCount === this.shapesData.length) {
+            reject(new Error("All SVG images failed to load"));
+          } else {
+            resolve();
+          }
+        }
+      };
+
+      for (let i = 0; i < this.shapesData.length; i++) {
+        const svgString = this.shapesData[i];
+        const svgBlob = new Blob([svgString], {type: 'image/svg+xml'});
+        const url = URL.createObjectURL(svgBlob);
+        const img = new Image();
+
+        img.onload = checkAllLoaded;
+        img.onerror = () => {
+          console.error(`Error loading SVG image ${i}`);
+          handleError();
+        };
+        
+        img.src = url;
+        this.svgImages.push({ image: img, url });
       }
-    };
-
-    for (let i = 0; i < this.shapesData.length; i++) {
-      const svgString = this.shapesData[i];
-      const svgBlob = new Blob([svgString], {type: 'image/svg+xml'});
-      const url = URL.createObjectURL(svgBlob);
-      const img = new Image();
-
-      img.onload = () => {
-        checkAllLoaded();
-      };
       
-      img.onerror = (e) => {
-        console.error(`Error loading SVG image ${i}:`, e);
-        checkAllLoaded(); // Continue with other images
-      };
-      
-      img.src = url;
-      this.svgImages.push({ image: img, url });
-    }
+      // Add a timeout in case images don't load
+      setTimeout(() => {
+        if (loadedCount + errorCount < this.shapesData.length) {
+          console.warn("SVG loading timed out, starting with available images");
+          resolve();
+        }
+      }, 3000);
+    });
   }
 
   resizeCanvas() {
@@ -185,29 +212,27 @@ class MovingShapes {
       
       this.ctx.beginPath();
       this.ctx.arc(0, 0, shape.size/1.5, 0, Math.PI * 2);
-      this.ctx.fillStyle = ` rgba(61, 26, 202, 0.3)`; //colors when highlight the shape
+      this.ctx.fillStyle = `rgba(61, 26, 202, 0.3)`; //colors when highlight the shape
       this.ctx.fill();
     }
     
-    // Use preloaded SVG image
-    if (this.svgImages && this.svgImages[shape.typeIndex]) {
-      const svgImg = this.svgImages[shape.typeIndex];
-      
-      if (svgImg && svgImg.image && svgImg.image.complete) {
-        this.ctx.globalAlpha = shape.active ? 1.0 : shape.opacity;
-        this.ctx.drawImage(
-          svgImg.image,
-          -shape.size/2, -shape.size/2,
-          shape.size, shape.size
-        );
-      } else {
-        // Draw a placeholder if image is not loaded
-        this.ctx.beginPath();
-        this.ctx.arc(0, 0, shape.size/2, 0, Math.PI * 2);
-        this.ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
-        this.ctx.lineWidth = 3;
-        this.ctx.stroke();
-      }
+    // Use preloaded SVG image if available
+    if (this.svgImages && this.svgImages[shape.typeIndex] && 
+        this.svgImages[shape.typeIndex].image && 
+        this.svgImages[shape.typeIndex].image.complete) {
+      this.ctx.globalAlpha = shape.active ? 1.0 : shape.opacity;
+      this.ctx.drawImage(
+        this.svgImages[shape.typeIndex].image,
+        -shape.size/2, -shape.size/2,
+        shape.size, shape.size
+      );
+    } else {
+      // Draw a placeholder if image is not loaded
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, shape.size/2, 0, Math.PI * 2);
+      this.ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+      this.ctx.lineWidth = 3;
+      this.ctx.stroke();
     }
     
     // Draw a subtle border around the shapes
@@ -314,7 +339,7 @@ class MovingShapes {
     }
   }
   
-  playSequence(sequence) {
+  playSequence(sequence, settings = {}) {
     if (this.isPlayingSequence) return;
     
     if (!sequence || sequence.length === 0) {
