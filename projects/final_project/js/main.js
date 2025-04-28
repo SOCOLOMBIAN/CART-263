@@ -134,12 +134,20 @@ document.addEventListener('DOMContentLoaded', () => {
   
   const shapeSvgs = [raro, prisma, estrella, circle];
   
+  // NEW SABINE:: added a function setupMovingShapes() -> CALL THIS ONLY ON CLICK (when you start)..
+
+  let movingShapes = null;
+  
+  
+  function setupMovingShapes(){
   // Initialize moving shapes with improved settings for better visibility
-  const movingShapes = new MovingShapes(shapesContainer, shapeSvgs, {
+  movingShapes = new MovingShapes(shapesContainer, shapeSvgs, {
     count: 1, 
     speed: difficultyManager.getBaseSpeed(), 
     size: { min: 50, max: 70 } 
   });
+
+
   
   //shape callbacks
   movingShapes.onShapeActivate = (data) => {
@@ -225,11 +233,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setTimeout(endGame, 1000);
   };
+}
 
-  // Add button event listeners with initialization
+  // Add button event listeners with initialization  -
   buttons.start.addEventListener('click', (e) => {
     initializeAudio(); // Ensure audio is initialized on first interaction
     AnimationEffects.createRipple(e, 'rgba(76, 175, 80, 0.5)');
+    // NEW SABINE:: remove the intro and add the game screen
+    screens.intro.classList.remove('active');
+    screens.game.classList.add('active');
+     //THEN CALL THE moving shapess...(set up)
+    setupMovingShapes();
     startGame();
   });
   
@@ -246,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
   //game state functions 
   function startGame() {
     // First hide the intro screen
-    screens.intro.classList.remove('active');
+    //screens.intro.classList.remove('active');
     
     // Show a loading message if SVGs aren't ready yet
     if (movingShapes && !movingShapes.imagesReady) {
@@ -286,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function continueStartGame() {
       // Show the game screen
-      screens.game.classList.add('active');
+      //screens.game.classList.add('active');
       
       const state = gameState.resetGame();
       updateDisplay(state.score, state.level);
